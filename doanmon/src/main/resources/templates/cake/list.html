@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Delights - Premium Cake Shop</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link active">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+
+                <a th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/admin/cakes" class="nav-link"
+                    style="color: var(--primary-color);">Admin Panel</a>
+
+                <a href="#" class="nav-link">Contact</a>
+
+                <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
+                    class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container" style="flex-direction: column;">
+            <h1>Taste the Happiness</h1>
+            <p>Handcrafted with love, baked to perfection. Discover our premium selection of cakes for every occasion.
+            </p>
+        </div>
+    </section>
+
+    <main class="main-content container" style="flex-direction: column; align-items: stretch;">
+        <h2 class="section-title">Our Famous Cakes</h2>
+
+        <div class="cake-grid">
+            <div th:each="cake : ${cakes}" class="cake-card">
+                <div class="cake-image">
+                    <!-- Check if image exists, otherwise show placeholder -->
+                    <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/400x300/ff9a9e/white?text=Sweet+Delights'}"
+                        th:alt="${cake.name}">
+                </div>
+                <div class="cake-info">
+                    <span class="cake-category" th:text="${cake.category}">Category</span>
+                    <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
+                    <p class="cake-price" th:text="${'$' + cake.price}">$0.00</p>
+                    <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary">View Details</a>
+
+                    <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                        th:href="@{/cart/add/{id}(id=${cake.id})}" class="btn btn-primary">Add to Cart</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Detail - Sweet Delights</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+                <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
+                    class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container" style="display: block;">
+        <div class="cake-detail">
+            <div class="detail-image">
+                <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/600x500/ff9a9e/white?text=Sweet+Delights'}"
+                    th:alt="${cake.name}">
+            </div>
+            <div class="detail-info">
+                <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category}">Category</span>
+                <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
+                <p class="detail-price" th:text="${'$' + cake.price}">$0.00</p>
+
+                <div class="detail-description">
+                    <h3>Description</h3>
+                    <p th:text="${cake.description}">Detailed description of the cake goes here...</p>
+                </div>
+
+                <div class="detail-actions">
+                    <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}"
+                        th:href="@{/cart/add/{id}(id=${cake.id})}" class="btn btn-primary">Add to Cart</a>
+                    <a href="/cakes" class="btn btn-secondary">Back to Menu</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+
+</html>
