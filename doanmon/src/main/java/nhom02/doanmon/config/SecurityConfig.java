@@ -10,8 +10,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import nhom02.doanmon.service.CustomOAuth2UserService;
 
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
+
 @Configuration
 @EnableWebSecurity
+@PropertySources({
+                @PropertySource(value = "file:.env", ignoreResourceNotFound = true),
+                @PropertySource(value = "file:../.env", ignoreResourceNotFound = true),
+                @PropertySource(value = "file:./doanmon/.env", ignoreResourceNotFound = true),
+                @PropertySource(value = "file:./doAn_J2EE/doanmon/.env", ignoreResourceNotFound = true)
+})
 public class SecurityConfig {
 
         @Autowired
