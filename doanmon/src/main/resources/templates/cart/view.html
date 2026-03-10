@@ -17,6 +17,12 @@
                 <a href="/cakes" class="nav-link">Home</a>
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a href="/cart" class="nav-link active">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
+                    class="nav-link">Profile</a>
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
             </nav>
         </div>
     </header>

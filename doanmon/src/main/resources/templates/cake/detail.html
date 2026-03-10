@@ -18,6 +18,12 @@
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
+                    class="nav-link">Profile</a>
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
             </nav>
         </div>
     </header>
