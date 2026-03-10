@@ -58,7 +58,8 @@
                     <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary">View Details</a>
 
                     <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}"
-                        th:href="@{/cart/add/{id}(id=${cake.id})}" class="btn btn-primary">Add to Cart</a>
+                        th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart">Add to
+                        Cart</a>
                 </div>
             </div>
         </div>
@@ -70,6 +71,63 @@
         </div>
     </footer>
 
+    <script>
+        document.querySelectorAll('.ajax-add-to-cart').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+
+                fetch(url, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) return response.json();
+                        throw new Error('Something went wrong');
+                    })
+                    .then(data => {
+                        // Update cart size
+                        const cartSpans = document.querySelectorAll('a[href="/cart"] span');
+                        cartSpans.forEach(span => span.textContent = data.cartSize);
+
+                        // Show fancy toast notification
+                        showToast('Đã thêm sản phẩm vào giỏ hàng thành công! 🍰');
+                    })
+                    .catch(error => {
+                        showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+                    });
+            });
+        });
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '30px';
+            toast.style.right = '30px';
+            toast.style.backgroundColor = isError ? '#e74c3c' : '#4CAF50';
+            toast.style.color = 'white';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '5px';
+            toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '1000';
+            toast.style.fontSize = '16px';
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.transform = 'translateY(100px)';
+            toast.style.opacity = '0';
+
+            document.body.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
 </body>
 
 </html>

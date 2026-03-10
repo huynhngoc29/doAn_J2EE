@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users - Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🍰 Admin Dashboard</h1>
+            <nav class="nav">
+                <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
+                <a href="/cakes" class="nav-link">Main Site</a>
+                <a href="/logout" class="nav-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <h2 class="section-title">Manage Users</h2>
+
+        <div th:if="${error}"
+            style="background: #e74c3c; color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px;"
+            th:text="${error}"></div>
+
+        <table
+            style="width: 100%; border-collapse: collapse; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <thead>
+                <tr style="background: #2c3e50; color: white;">
+                    <th style="padding: 15px;">ID</th>
+                    <th style="padding: 15px;">Username</th>
+                    <th style="padding: 15px;">Email</th>
+                    <th style="padding: 15px;">Full Name</th>
+                    <th style="padding: 15px;">Roles</th>
+                    <th style="padding: 15px;">Status</th>
+                    <th style="padding: 15px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="user : ${users}" style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 15px;" th:text="${user.id}">1</td>
+                    <td style="padding: 15px;" th:text="${user.username}">user</td>
+                    <td style="padding: 15px;" th:text="${user.email}">user@email.com</td>
+                    <td style="padding: 15px;" th:text="${user.fullName}">Full Name</td>
+                    <td style="padding: 15px;">
+                        <span th:each="role : ${user.roles}" th:text="${role.name} + ' '">USER</span>
+                    </td>
+                    <td style="padding: 15px;">
+                        <span th:text="${user.enabled ? 'Active' : 'Disabled'}"
+                            th:style="${user.enabled ? 'color: green; font-weight: bold;' : 'color: red; font-weight: bold;'}">Active</span>
+                    </td>
+                    <td style="padding: 15px;" th:with="isAdmin=${user.roles.![name].contains('ADMIN')}">
+                        <th:block th:if="${!isAdmin}">
+                            <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-secondary"
+                                style="font-size: 0.8rem; padding: 5px 10px; display: inline-block;">Edit Role</a>
+                            <a th:href="@{/admin/users/toggle-status/{id}(id=${user.id})}"
+                                th:class="${user.enabled ? 'btn btn-secondary' : 'btn btn-primary'}"
+                                th:text="${user.enabled ? 'Disable' : 'Enable'}"
+                                style="font-size: 0.8rem; padding: 5px 10px; margin-left: 5px; display: inline-block;"
+                                onclick="return confirm('Are you sure?')">Disable</a>
+                            <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-primary"
+                                style="font-size: 0.8rem; padding: 5px 10px; background: #e74c3c; margin-left: 5px; display: inline-block;"
+                                onclick="return confirm('Xác nhận xóa tài khoản vĩnh viễn?')">Delete</a>
+                        </th:block>
+                        <span th:if="${isAdmin}" style="color: #666; font-style: italic;">Admin Protected</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+</body>
+
+</html>

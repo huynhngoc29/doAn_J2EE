@@ -46,6 +46,24 @@ public class CartController {
         return "redirect:/cart";
     }
 
+    @PostMapping("/api/add/{id}")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<?> addApi(@PathVariable Long id,
+            org.springframework.security.core.Authentication authentication) {
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN)
+                    .body(java.util.Collections.singletonMap("error", "Admins cannot shop"));
+        }
+        Cake cake = cakeService.findById(id).orElse(null);
+        if (cake != null) {
+            cart.addItem(new CartItem(cake, 1));
+            return org.springframework.http.ResponseEntity
+                    .ok(java.util.Collections.singletonMap("cartSize", cart.getItems().size()));
+        }
+        return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.NOT_FOUND).build();
+    }
+
     @GetMapping("/remove/{id}")
     public String removeFromCart(@PathVariable Long id) {
         cart.removeItem(id);

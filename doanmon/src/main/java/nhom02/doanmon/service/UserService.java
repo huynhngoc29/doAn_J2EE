@@ -40,6 +40,7 @@ public class UserService implements UserDetailsService {
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
+                user.getEnabled(), true, true, true,
                 authorities);
     }
 
@@ -66,7 +67,7 @@ public class UserService implements UserDetailsService {
             return roleRepository.save(newRole);
         });
 
-        user.setRoles(Collections.singleton(userRole));
+        user.setRoles(new java.util.HashSet<>(Collections.singleton(userRole)));
         return userRepository.save(user);
     }
 
@@ -78,7 +79,53 @@ public class UserService implements UserDetailsService {
             newRole.setName("USER");
             return roleRepository.save(newRole);
         });
-        user.setRoles(Collections.singleton(userRole));
+        user.setRoles(new java.util.HashSet<>(Collections.singleton(userRole)));
         save(user);
+    }
+
+    public java.util.List<User> findAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public java.util.Optional<User> findUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Transactional
+    public void updateUserRole(Long userId, String roleName) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
+        if (isAdmin) {
+            throw new RuntimeException("Cannot change role of an ADMIN user");
+        }
+        Role role = roleRepository.findByName(roleName).orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setName(roleName);
+            return roleRepository.save(newRole);
+        });
+        user.setRoles(new java.util.HashSet<>(Collections.singleton(role)));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
+        if (isAdmin) {
+            throw new RuntimeException("Cannot delete an ADMIN user");
+        }
+        userRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void toggleUserStatus(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
+        if (isAdmin) {
+            throw new RuntimeException("Cannot disable an ADMIN user");
+        }
+        user.setEnabled(!user.getEnabled());
+        userRepository.save(user);
     }
 }
