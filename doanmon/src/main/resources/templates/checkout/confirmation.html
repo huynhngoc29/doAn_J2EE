@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+                <a href="/cart" class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container" style="display: block; text-align: center;">
+        <h2 class="section-title">Thank you for your order!</h2>
+        <p>Your cash-on-delivery order has been received and will be processed shortly.</p>
+        <a href="/cakes" class="btn btn-primary">Continue Shopping</a>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

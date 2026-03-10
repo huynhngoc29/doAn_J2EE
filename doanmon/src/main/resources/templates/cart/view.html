@@ -52,13 +52,13 @@
                             </div>
                         </td>
                         <td style="padding: 20px; font-weight: 600; color: var(--light-text);"
-                            th:text="${'$' + item.cake.price}">$10.00</td>
+                            th:text="${#numbers.formatDecimal(item.cake.price*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
                         <td style="padding: 20px; text-align: center;">
                             <span style="background: #f0f0f0; padding: 5px 15px; border-radius: 20px; font-weight: 700;"
                                 th:text="${item.quantity}">1</span>
                         </td>
                         <td style="padding: 20px; text-align: right; font-weight: 700; color: var(--primary-color);"
-                            th:text="${'$' + item.totalPrice}">$10.00</td>
+                            th:text="${#numbers.formatDecimal(item.totalPrice*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
                         <td style="padding: 20px; text-align: center;">
                             <a th:href="@{/cart/remove/{id}(id=${item.cake.id})}"
                                 style="color: #ff6b6b; text-decoration: none; font-weight: 600; font-size: 0.9rem;">RX
@@ -74,11 +74,11 @@
                     <span style="display: block; color: var(--light-text); font-size: 0.9rem;">Total Amount</span>
                     <span
                         style="display: block; font-size: 2rem; color: var(--text-color); font-weight: 800; font-family: 'Fredoka One', cursive;"
-                        th:text="${'$' + total}">$0.00</span>
+                        th:text="${#numbers.formatDecimal(total*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</span>
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <a href="/cart/clear" class="btn btn-secondary">Clear Cart</a>
-                    <button class="btn btn-primary" onclick="alert('Proceeding to checkout...')">Checkout Now</button>
+                    <a href="/checkout" class="btn btn-primary">Checkout Now</a>
                 </div>
             </div>
         </div>

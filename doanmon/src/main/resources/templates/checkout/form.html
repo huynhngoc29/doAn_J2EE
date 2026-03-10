@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Cash on Delivery</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+                <a href="/cart" class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container" style="display: block;">
+        <h2 class="section-title">Checkout</h2>
+        <div th:if="${error}" style="color:#e74c3c; font-weight:600; margin-bottom:20px;" th:text="${error}"></div>
+
+        <div th:if="${cart.items.empty}" style="text-align: center; margin-top: 50px;">
+            <p>Your cart is empty, nothing to checkout.</p>
+            <a href="/cakes" class="btn btn-primary">Continue Shopping</a>
+        </div>
+
+        <div th:unless="${cart.items.empty}" class="cart-container"
+            style="background: white; padding: 40px; border-radius: var(--radius); box-shadow: var(--shadow);">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #f0f0f0;">
+                        <th style="padding: 15px; text-align: left;">Item</th>
+                        <th style="padding: 15px; text-align: left;">Price</th>
+                        <th style="padding: 15px; text-align: center;">Quantity</th>
+                        <th style="padding: 15px; text-align: right;">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${cart.items}" style="border-bottom: 1px solid #f9f9f9;">
+                        <td style="padding: 20px;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <img th:src="${item.cake.image}"
+                                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
+                                <span style="font-weight: 600; color: var(--text-color);"
+                                    th:text="${item.cake.name}">Cake Name</span>
+                            </div>
+                        </td>
+                        <td style="padding: 20px; font-weight: 600; color: var(--light-text);"
+                            th:text="${#numbers.formatDecimal(item.cake.price*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
+                        <td style="padding: 20px; text-align: center;">
+                            <span style="background: #f0f0f0; padding: 5px 15px; border-radius: 20px; font-weight: 700;"
+                                th:text="${item.quantity}">1</span>
+                        </td>
+                        <td style="padding: 20px; text-align: right; font-weight: 700; color: var(--primary-color);"
+                            th:text="${#numbers.formatDecimal(item.totalPrice*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div
+                style="margin-top: 40px; display: flex; justify-content: flex-end; align-items: center; gap: 40px; border-top: 2px solid #f0f0f0; padding-top: 30px;">
+                <div style="text-align: right;">
+                    <span style="display: block; color: var(--light-text); font-size: 0.9rem;">Total Amount</span>
+                    <span
+                        style="display: block; font-size: 2rem; color: var(--text-color); font-weight: 800; font-family: 'Fredoka One', cursive;"
+                        th:text="${#numbers.formatDecimal(total*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</span>
+                </div>
+                <form th:action="@{/checkout}" method="post" style="display:inline;" id="checkoutForm">
+                    <div style="margin-bottom: 20px;">
+                        <label for="address" style="display:block; font-weight:600;">Delivery Address</label>
+                        <textarea id="address" name="address" required style="width:100%;height:80px;"></textarea>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; font-weight:600;">Payment Method</label>
+                        <label><input type="radio" name="method" value="COD" checked /> Cash on Delivery</label>
+                        <label><input type="radio" name="method" value="BANK" /> Bank Transfer (VNPay)</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="checkoutButton">Confirm Order</button>
+                </form>
+                <script>
+                    const methodRadios = document.querySelectorAll('input[name="method"]');
+                    const checkoutBtn = document.getElementById('checkoutButton');
+                    methodRadios.forEach(r => r.addEventListener('change', () => {
+                        if (r.value === 'BANK' && r.checked) {
+                            checkoutBtn.textContent = 'Pay with VNPay';
+                        } else if (r.value === 'COD' && r.checked) {
+                            checkoutBtn.textContent = 'Confirm Order';
+                        }
+                    }));
+                </script>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

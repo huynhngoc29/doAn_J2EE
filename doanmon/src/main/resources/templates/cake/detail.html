@@ -31,7 +31,7 @@
             <div class="detail-info">
                 <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category}">Category</span>
                 <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
-                <p class="detail-price" th:text="${'$' + cake.price}">$0.00</p>
+                <p class="detail-price" th:text="${#numbers.formatDecimal(cake.price*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</p>
 
                 <div class="detail-description">
                     <h3>Description</h3>
