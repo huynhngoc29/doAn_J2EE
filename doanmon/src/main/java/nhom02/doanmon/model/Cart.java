@@ -2,14 +2,14 @@ package nhom02.doanmon.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import lombok.Data;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
 @Component
 @SessionScope
-@Data
 public class Cart {
+
     private List<CartItem> items = new ArrayList<>();
 
     public void addItem(CartItem newItem) {
@@ -45,5 +45,14 @@ public class Cart {
 
     public double getTotalAmount() {
         return items.stream().mapToDouble(CartItem::getTotalPrice).sum();
+    }
+
+    // getters/setters
+    public List<CartItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<CartItem> items) {
+        this.items = items;
     }
 }
