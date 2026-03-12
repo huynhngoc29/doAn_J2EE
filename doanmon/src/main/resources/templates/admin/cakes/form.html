@@ -50,7 +50,7 @@
         <div class="form-container">
             <h2 class="section-title" th:text="${cake.id == null ? 'Add New Cake' : 'Edit Cake'}">Edit Cake</h2>
 
-            <form th:action="@{/admin/cakes/save}" th:object="${cake}" method="post">
+            <form th:action="@{/admin/cakes/save}" th:object="${cake}" method="post" enctype="multipart/form-data">
                 <input type="hidden" th:field="*{id}">
 
                 <div class="form-group">
@@ -69,8 +69,19 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="text" th:field="*{image}" class="form-control" placeholder="https://...">
+                    <label>Image (Upload)</label>
+                    <input type="file" name="imageFile" accept="image/*" class="form-control">
+                    <div th:if="${cake.image != null}" style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                        Current image: <img th:src="${cake.image}" style="max-height: 50px; vertical-align: middle; margin-left: 10px; border-radius: 5px;" alt="Current Image">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>3D Model (.glb, .gltf, etc.)</label>
+                    <input type="file" name="model3File" accept=".glb,.gltf" class="form-control">
+                    <div th:if="${cake.model3D != null}" style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                        Current model: <span th:text="${cake.model3D}"></span>
+                    </div>
                 </div>
 
                 <div class="form-group">
