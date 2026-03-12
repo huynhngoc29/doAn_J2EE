@@ -17,7 +17,7 @@ public class Controller {
 
     @GetMapping("")
     public String home() {
-        return "index";
+        return "redirect:/cakes";
     }
 
     @PostMapping("/submitOrder")

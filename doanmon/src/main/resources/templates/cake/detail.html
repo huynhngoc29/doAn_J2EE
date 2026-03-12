@@ -18,6 +18,12 @@
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
+                    class="nav-link">Profile</a>
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
             </nav>
         </div>
     </header>
@@ -31,7 +37,7 @@
             <div class="detail-info">
                 <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category}">Category</span>
                 <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
-                <p class="detail-price" th:text="${#numbers.formatDecimal(cake.price*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</p>
+                <p class="detail-price" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
 
                 <div class="detail-description">
                     <h3>Description</h3>
@@ -39,6 +45,12 @@
                 </div>
 
                 <div class="detail-actions">
+                    <button th:if="${cake.model3D != null}"
+                            class="btn btn-info"
+                            style="margin-right: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;"
+                            onclick="open3DViewer()">
+                        View 3D Model
+                    </button>
                     <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}"
                         th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart">Add to
                         Cart</a>
@@ -53,6 +65,36 @@
             <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- 3D Viewer Modal -->
+    <div id="model3dModal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.8);">
+        <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 900px; height: 75vh; border-radius: 10px; position: relative;">
+            <span onclick="close3DViewer()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; right: 20px; z-index: 1060;">&times;</span>
+            <h2 style="margin-top: 0">3D Model: <span th:text="${cake.name}"></span></h2>
+            <div id="model3dContainer" style="width: 100%; height: calc(100% - 40px); background: #eee; border-radius: 5px; overflow: hidden; position: relative;"></div>
+        </div>
+    </div>
+
+    <div th:insert="~{cake/threejs-scripts}"></div>
+
+    <script th:inline="javascript">
+        function open3DViewer() {
+            var modal = document.getElementById("model3dModal");
+            modal.style.display = "block";
+            
+            var modelName = /*[[${cake.model3D}]]*/ null;
+            if (modelName) {
+                // Assuming show3DModel is defined in threejs-scripts fragment
+                show3DModel("model3dContainer", "/model/" + modelName);
+            }
+        }
+        
+        function close3DViewer() {
+            var modal = document.getElementById("model3dModal");
+            modal.style.display = "none";
+            document.getElementById("model3dContainer").innerHTML = ""; 
+        }
+    </script>
 
     <script>
         document.querySelectorAll('.ajax-add-to-cart').forEach(button => {

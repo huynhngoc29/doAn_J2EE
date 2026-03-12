@@ -51,13 +51,13 @@
                             </div>
                         </td>
                         <td style="padding: 20px; font-weight: 600; color: var(--light-text);"
-                            th:text="${#numbers.formatDecimal(item.cake.price*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
+                            th:text="${'$' + #numbers.formatDecimal(item.cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                         <td style="padding: 20px; text-align: center;">
                             <span style="background: #f0f0f0; padding: 5px 15px; border-radius: 20px; font-weight: 700;"
                                 th:text="${item.quantity}">1</span>
                         </td>
                         <td style="padding: 20px; text-align: right; font-weight: 700; color: var(--primary-color);"
-                            th:text="${#numbers.formatDecimal(item.totalPrice*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</td>
+                            th:text="${'$' + #numbers.formatDecimal(item.totalPrice, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
                     </tr>
                 </tbody>
             </table>
@@ -68,7 +68,7 @@
                     <span style="display: block; color: var(--light-text); font-size: 0.9rem;">Total Amount</span>
                     <span
                         style="display: block; font-size: 2rem; color: var(--text-color); font-weight: 800; font-family: 'Fredoka One', cursive;"
-                        th:text="${#numbers.formatDecimal(total*23000,0,'COMMA',0,'POINT') + ' ₫'}">0 ₫</span>
+                        th:text="${'$' + #numbers.formatDecimal(total, 1, 'COMMA', 2, 'POINT')}">$0.00</span>
                 </div>
                 <form th:action="@{/checkout}" method="post" style="display:inline;" id="checkoutForm">
                     <div style="margin-bottom: 20px;">
