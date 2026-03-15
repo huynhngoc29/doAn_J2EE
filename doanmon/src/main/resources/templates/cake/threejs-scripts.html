@@ -55,7 +55,7 @@
             scene.add(directionalLight);
 
             // Thêm controls để xoay, zoom mô hình
-            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.autoRotate = true;
@@ -77,6 +77,111 @@
 
                     // Thêm renderer vào container
                     viewerContainer.appendChild(renderer.domElement);
+
+                    // ==========================================
+                    // SỰ KIỆN KÉO THẢ KHUNG CHỮ & STICKER
+                    // ==========================================
+                    if (!textRaycaster) textRaycaster = new THREE.Raycaster();
+                    if (!mouseVector) mouseVector = new THREE.Vector2();
+
+                    renderer.domElement.addEventListener('pointerdown', function(event) {
+                        if (draggableMeshes.length === 0) return;
+                        
+                        const rect = renderer.domElement.getBoundingClientRect();
+                        mouseVector.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                        mouseVector.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                        
+                        textRaycaster.setFromCamera(mouseVector, camera);
+                        const intersects = textRaycaster.intersectObjects(draggableMeshes);
+                        
+                        // Nếu bấm trúng khung chữ hoặc sticker
+                        if (intersects.length > 0) {
+                            isDraggingMesh = true;
+                            currentDraggedMesh = intersects[0].object;
+                            if (controls) controls.enabled = false; // Vô hiệu hoá xoay camera
+                            // Tắt auto rotate để khỏi xoay bánh khi đang chỉnh
+                            if (controls) controls.autoRotate = false;
+                        }
+                    });
+
+                    renderer.domElement.addEventListener('pointermove', function(event) {
+                        if (isDraggingMesh && currentDraggedMesh) {
+                            const rect = renderer.domElement.getBoundingClientRect();
+                            mouseVector.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                            mouseVector.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                            
+                            textRaycaster.setFromCamera(mouseVector, camera);
+                            
+                            // Tính toán điểm giao với một mặt phẳng vô hình ngang tầm
+                            const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -currentDraggedMesh.position.y);
+                            const intersectPoint = new THREE.Vector3();
+                            textRaycaster.ray.intersectPlane(dragPlane, intersectPoint);
+                            
+                            if (intersectPoint) {
+                                // Cập nhật vị trí kéo
+                                currentDraggedMesh.position.x = intersectPoint.x;
+                                currentDraggedMesh.position.z = intersectPoint.z;
+                            }
+                        } else if (draggableMeshes.length > 0) {
+                            // Nếu đang hover chuột lên chữ/sticker thì đổi trỏ chuột thành hình bàn tay để user biết
+                            const rect = renderer.domElement.getBoundingClientRect();
+                            mouseVector.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                            mouseVector.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                            textRaycaster.setFromCamera(mouseVector, camera);
+                            
+                            const intersects = textRaycaster.intersectObjects(draggableMeshes);
+                            renderer.domElement.style.cursor = (intersects.length > 0) ? 'move' : 'default';
+                        }
+                    });
+
+                    window.addEventListener('pointerup', function() {
+                        if (isDraggingMesh) {
+                            isDraggingMesh = false;
+                            currentDraggedMesh = null;
+                            if (controls) controls.enabled = true; // Bật lại xoay camera
+                            renderer.domElement.style.cursor = 'default';
+                        }
+                    });
+
+                    // ==========================================
+                    // SỰ KIỆN KÉO THẢ TỪ KHUNG STICKER (UI) VÀO MÔ HÌNH 3D
+                    // ==========================================
+                    viewerContainer.addEventListener('dragenter', function(event) {
+                        event.preventDefault(); // Cho phép drop
+                    });
+
+                    viewerContainer.addEventListener('dragover', function(event) {
+                        event.preventDefault(); // Cho phép drop
+                        event.dataTransfer.dropEffect = 'copy';
+                    });
+
+                    viewerContainer.addEventListener('drop', function(event) {
+                        event.preventDefault();
+                        const emoji = event.dataTransfer.getData('text/plain');
+                        if (emoji && gltf && gltf.scene) {
+                            const rect = renderer.domElement.getBoundingClientRect();
+                            mouseVector.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+                            mouseVector.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+                            
+                            textRaycaster.setFromCamera(mouseVector, camera);
+                            
+                            const intersects = textRaycaster.intersectObject(gltf.scene, true);
+                            let dropPos = null;
+                            if (intersects.length > 0) {
+                                dropPos = intersects[0].point;
+                            } else {
+                                // Nếu thả ra bên ngoài bánh thì tính tọa độ giao với mặt phẳng ngang tàm tạm
+                                const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+                                const intersectPoint = new THREE.Vector3();
+                                textRaycaster.ray.intersectPlane(dragPlane, intersectPoint);
+                                if (intersectPoint) dropPos = intersectPoint;
+                            }
+                            
+                            applyStickerOnCake(gltf.scene, emoji, dropPos);
+                        }
+                    });
+                    // ==========================================
+
 
                     // Tạo controls chọn màu - gọn hơn và ít che khuất hơn
                     const colorControls = document.createElement('div');
@@ -126,9 +231,9 @@
                         { name: 'Nâu đỏ', hex: '#A52A2A' }
                     ];
 
-                    // Tạo nút chuyển đổi để ẩn/hiện controls chọn màu
+                    // Tạo nút chuyển đổi để ẩn/hiện controls
                     const toggleBtn = document.createElement('button');
-                    toggleBtn.innerHTML = '<i class="fas fa-palette"></i>';
+                    toggleBtn.innerHTML = '<i class="fas fa-pen"></i>';
                     toggleBtn.style.position = 'absolute';
                     toggleBtn.style.bottom = '10px';
                     toggleBtn.style.right = '10px';
@@ -151,590 +256,184 @@
                     colorControls.style.display = 'none';
                     colorControls.style.right = '60px'; // Đặt cạnh nút chuyển đổi
 
-                    // Chuyển đổi hiển thị controls chọn màu
+                    // Chuyển đổi hiển thị controls
                     let colorControlsVisible = false;
                     toggleBtn.onclick = function() {
                         colorControlsVisible = !colorControlsVisible;
                         colorControls.style.display = colorControlsVisible ? 'block' : 'none';
-                        this.innerHTML = colorControlsVisible ? '<i class="fas fa-times"></i>' : '<i class="fas fa-palette"></i>';
+                        this.innerHTML = colorControlsVisible ? '<i class="fas fa-times"></i>' : '<i class="fas fa-pen"></i>';
                         this.style.backgroundColor = colorControlsVisible ? '#dc3545' : '#007bff';
                     };
 
                     viewerContainer.appendChild(toggleBtn);
 
-                    // Tạo các tab cho các lựa chọn màu khác nhau
-                    const tabsContainer = document.createElement('div');
-                    tabsContainer.style.display = 'flex';
-                    tabsContainer.style.marginBottom = '8px';
-                    tabsContainer.style.borderBottom = '1px solid #ddd';
+                    // --- Tạo controls cho Ghi Chữ ---
+                    const textControlsDiv = document.createElement('div');
+                    textControlsDiv.style.display = 'flex';
+                    textControlsDiv.style.flexDirection = 'column';
+                    textControlsDiv.style.gap = '8px';
 
-                    // Tab màu đơn
-                    const solidColorTab = document.createElement('div');
-                    solidColorTab.innerText = 'Màu đơn';
-                    solidColorTab.style.padding = '4px 8px';
-                    solidColorTab.style.cursor = 'pointer';
-                    solidColorTab.style.fontSize = '12px';
-                    solidColorTab.style.fontWeight = 'bold';
-                    solidColorTab.style.borderBottom = '2px solid #007bff';
-                    solidColorTab.style.color = '#007bff';
+                    // Tiêu đề
+                    const textHeader = document.createElement('div');
+                    textHeader.innerHTML = '<strong>Ghi Chữ Lên Bánh</strong>';
+                    textHeader.style.fontSize = '14px';
+                    textHeader.style.color = '#333';
+                    textHeader.style.textAlign = 'center';
+                    textHeader.style.borderBottom = '1px solid #ddd';
+                    textHeader.style.paddingBottom = '5px';
+                    textControlsDiv.appendChild(textHeader);
 
-                    // Tab màu caro
-                    const checkeredTab = document.createElement('div');
-                    checkeredTab.innerText = 'Màu caro';
-                    checkeredTab.style.padding = '4px 8px';
-                    checkeredTab.style.cursor = 'pointer';
-                    checkeredTab.style.fontSize = '12px';
-                    checkeredTab.style.fontWeight = 'bold';
-                    checkeredTab.style.borderBottom = '2px solid transparent';
-                    checkeredTab.style.color = '#666';
+                    // Nhập nội dung
+                    const textInputLabel = document.createElement('div');
+                    textInputLabel.innerText = 'Nhập chữ:';
+                    textInputLabel.style.fontSize = '12px';
 
-                    // Thêm các tab vào container
-                    tabsContainer.appendChild(solidColorTab);
-                    tabsContainer.appendChild(checkeredTab);
-                    colorControls.appendChild(tabsContainer);
+                    const textInput = document.createElement('textarea');
+                    textInput.placeholder = 'Happy Birthday...\nTròn 1 tuổi...';
+                    textInput.className = 'form-control form-control-sm';
+                    textInput.style.fontSize = '12px';
+                    textInput.style.resize = 'vertical';
+                    textInput.style.minHeight = '60px';
 
-                    // Tạo các vùng nội dung cho từng tab
-                    const solidColorContent = document.createElement('div');
-                    solidColorContent.style.display = 'block';
+                    // Chọn màu chữ
+                    const textColorRow = document.createElement('div');
+                    textColorRow.style.display = 'flex';
+                    textColorRow.style.alignItems = 'center';
+                    textColorRow.style.gap = '5px';
 
-                    const checkeredContent = document.createElement('div');
-                    checkeredContent.style.display = 'none';
+                    const textColorLabel = document.createElement('div');
+                    textColorLabel.innerText = 'Màu chữ:';
+                    textColorLabel.style.fontSize = '12px';
+                    textColorLabel.style.flex = '1';
 
-                    // Chức năng chuyển tab
-                    solidColorTab.onclick = function() {
-                        solidColorContent.style.display = 'block';
-                        checkeredContent.style.display = 'none';
-                        solidColorTab.style.borderBottom = '2px solid #007bff';
-                        solidColorTab.style.color = '#007bff';
-                        checkeredTab.style.borderBottom = '2px solid transparent';
-                        checkeredTab.style.color = '#666';
+                    const textColorInput = document.createElement('input');
+                    textColorInput.type = 'color';
+                    textColorInput.value = '#FF69B4'; // Mặc định màu hồng
+                    textColorInput.style.width = '30px';
+                    textColorInput.style.height = '30px';
+                    textColorInput.style.border = 'none';
+                    textColorInput.style.padding = '0';
+
+                    textColorRow.appendChild(textColorLabel);
+                    textColorRow.appendChild(textColorInput);
+
+                    // Thanh trượt phóng to thu nhỏ
+                    const textScaleRow = document.createElement('div');
+                    textScaleRow.style.display = 'flex';
+                    textScaleRow.style.alignItems = 'center';
+                    textScaleRow.style.gap = '5px';
+
+                    const textScaleLabel = document.createElement('div');
+                    textScaleLabel.innerText = 'Kích thước:';
+                    textScaleLabel.style.fontSize = '12px';
+                    textScaleLabel.style.flex = '1';
+
+                    const textScaleInput = document.createElement('input');
+                    textScaleInput.type = 'range';
+                    textScaleInput.min = '0.5';
+                    textScaleInput.max = '2.5';
+                    textScaleInput.step = '0.1';
+                    textScaleInput.value = '1.0';
+                    textScaleInput.style.width = '70px';
+
+                    textScaleInput.oninput = function() {
+                        const val = parseFloat(this.value);
+                        draggableMeshes.forEach(mesh => {
+                            mesh.scale.set(val, val, 1);
+                        });
                     };
 
-                    checkeredTab.onclick = function() {
-                        solidColorContent.style.display = 'none';
-                        checkeredContent.style.display = 'block';
-                        checkeredTab.style.borderBottom = '2px solid #007bff';
-                        checkeredTab.style.color = '#007bff';
-                        solidColorTab.style.borderBottom = '2px solid transparent';
-                        solidColorTab.style.color = '#666';
+                    textScaleRow.appendChild(textScaleLabel);
+                    textScaleRow.appendChild(textScaleInput);
+
+                    // Nút áp dụng chữ
+                    const applyTextBtn = document.createElement('button');
+                    applyTextBtn.innerHTML = 'Khởi tạo chữ';
+                    applyTextBtn.className = 'btn btn-sm btn-primary';
+                    applyTextBtn.style.marginTop = '5px';
+                    applyTextBtn.style.fontSize = '12px';
+                    
+                    applyTextBtn.onclick = function() {
+                        const text = textInput.value || 'Happy Birthday';
+                        const textColor = textColorInput.value;
+                        
+                        applyTextOnCake(gltf.scene, text, textColor, 'transparent');
+                        
+                        // Áp dụng scale hiện tại ngay khi khởi tạo
+                        if (textPlaneMesh) {
+                            const scaleVal = parseFloat(textScaleInput.value);
+                            textPlaneMesh.scale.set(scaleVal, scaleVal, 1);
+                        }
                     };
 
-                    // Thêm các vùng nội dung vào controls chọn màu
-                    colorControls.appendChild(solidColorContent);
-                    colorControls.appendChild(checkeredContent);
+                    // Phần chọn Sticker
+                    const stickerRow = document.createElement('div');
+                    stickerRow.style.display = 'flex';
+                    stickerRow.style.alignItems = 'center';
+                    stickerRow.style.gap = '5px';
+                    stickerRow.style.flexWrap = 'wrap';
+                    stickerRow.style.marginTop = '10px';
 
-                    // Tạo grid các nút chọn màu đơn - gọn hơn
-                    const colorGrid = document.createElement('div');
-                    colorGrid.style.display = 'grid';
-                    colorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)'; // 5 cột thay vì 6
-                    colorGrid.style.gap = '6px'; // Khoảng cách nhỏ hơn
-                    colorGrid.style.marginBottom = '8px';
+                    const stickerLabel = document.createElement('div');
+                    stickerLabel.innerText = 'Sticker:';
+                    stickerLabel.style.fontSize = '12px';
+                    stickerLabel.style.width = '100%';
+                    stickerLabel.style.marginBottom = '-5px';
 
-                    colors.forEach(color => {
-                        const colorBtn = document.createElement('button');
-                        colorBtn.style.width = '25px'; // Nút nhỏ hơn
-                        colorBtn.style.height = '25px';
-                        colorBtn.style.backgroundColor = color.hex;
-                        colorBtn.style.border = '2px solid #ddd';
-                        colorBtn.style.borderRadius = '50%';
-                        colorBtn.style.cursor = 'pointer';
-                        colorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
-                        colorBtn.title = color.name;
+                    const emojis = ['🍓', '🍒', '🍫', '💖', '🎂', '🎈', '🎉', '👑', '✨', '🌹'];
+                    stickerRow.appendChild(stickerLabel);
 
-                        // Thêm hiệu ứng hover
-                        colorBtn.onmouseover = function() {
-                            this.style.transform = 'scale(1.1)';
+                    emojis.forEach(emoji => {
+                        const emojiBtn = document.createElement('button');
+                        emojiBtn.innerText = emoji;
+                        emojiBtn.style.fontSize = '16px';
+                        emojiBtn.style.border = '1px solid #ddd';
+                        emojiBtn.style.background = 'white';
+                        emojiBtn.style.borderRadius = '4px';
+                        emojiBtn.style.cursor = 'grab';
+                        emojiBtn.style.padding = '2px 5px';
+                        
+                        // Cấu hình kéo thả HTML5 UI
+                        emojiBtn.draggable = true;
+                        emojiBtn.ondragstart = function(event) {
+                            event.dataTransfer.setData('text/plain', emoji);
+                            event.dataTransfer.effectAllowed = 'copy';
                         };
-
-                        colorBtn.onmouseout = function() {
-                            this.style.transform = 'scale(1)';
+                        
+                        emojiBtn.onclick = function() {
+                            applyStickerOnCake(gltf.scene, emoji); // Mặc định nếu chỉ nhấp chuột
                         };
-
-                        colorBtn.onclick = function() {
-                            changeModelColor(gltf.scene, color.hex);
-                            // Đánh dấu màu đã chọn
-                            document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
-                                btn.style.border = '2px solid #ddd';
-                                btn.style.boxShadow = 'none';
-                            });
-                            this.style.border = '2px solid #000';
-                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
-                        };
-
-                        colorBtn.className = 'color-btn';
-                        colorGrid.appendChild(colorBtn);
+                        stickerRow.appendChild(emojiBtn);
                     });
 
-                    solidColorContent.appendChild(colorGrid);
+                    // Nút xoá tất cả (chữ & sticker)
+                    const removeTextBtn = document.createElement('button');
+                    removeTextBtn.innerHTML = 'Xoá tất cả nhãn';
+                    removeTextBtn.className = 'btn btn-sm btn-outline-danger';
+                    removeTextBtn.style.marginTop = '10px';
+                    removeTextBtn.style.fontSize = '12px';
 
-                    // Thêm hàng controls gọn cho màu đơn
-                    const controlsRow = document.createElement('div');
-                    controlsRow.style.display = 'flex';
-                    controlsRow.style.justifyContent = 'space-between';
-                    controlsRow.style.alignItems = 'center';
-                    controlsRow.style.gap = '5px';
-
-                    // Thêm nút khôi phục màu gốc với style đẹp hơn
-                    const resetBtn = document.createElement('button');
-                    resetBtn.innerHTML = '<i class="fas fa-undo-alt"></i>';
-                    resetBtn.title = 'Khôi phục màu gốc';
-                    resetBtn.className = 'btn btn-sm btn-outline-secondary';
-                    resetBtn.style.padding = '3px 8px';
-                    resetBtn.style.fontSize = '12px';
-                    resetBtn.style.flex = '0 0 auto';
-                    resetBtn.onclick = function() {
-                        resetModelColor(gltf.scene);
-                        // Đặt lại màu cho các nút
-                        document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
-                            btn.style.border = '2px solid #ddd';
-                            btn.style.boxShadow = 'none';
+                    removeTextBtn.onclick = function() {
+                        draggableMeshes.forEach(mesh => {
+                            scene.remove(mesh);
+                            if (mesh.geometry) mesh.geometry.dispose();
+                            if (mesh.material && mesh.material.map) mesh.material.map.dispose();
+                            if (mesh.material) mesh.material.dispose();
                         });
+                        draggableMeshes = [];
+                        textPlaneMesh = null;
                     };
 
-                    // Thêm input chọn màu tùy chỉnh - gọn hơn
-                    const customColorInput = document.createElement('input');
-                    customColorInput.type = 'color';
-                    customColorInput.style.width = '30px';
-                    customColorInput.style.height = '30px';
-                    customColorInput.style.border = 'none';
-                    customColorInput.style.borderRadius = '4px';
-                    customColorInput.style.cursor = 'pointer';
-                    customColorInput.style.padding = '0';
-                    customColorInput.style.flex = '0 0 auto';
-                    customColorInput.title = 'Chọn màu tùy chỉnh';
+                    textControlsDiv.appendChild(textInputLabel);
+                    textControlsDiv.appendChild(textInput);
+                    textControlsDiv.appendChild(textColorRow);
+                    textControlsDiv.appendChild(textScaleRow);
+                    textControlsDiv.appendChild(applyTextBtn);
+                    textControlsDiv.appendChild(stickerRow);
+                    textControlsDiv.appendChild(removeTextBtn);
+
+                    colorControls.appendChild(textControlsDiv);
 
-                    const applyCustomBtn = document.createElement('button');
-                    applyCustomBtn.innerHTML = '<i class="fas fa-check"></i>';
-                    applyCustomBtn.title = 'Áp dụng màu tùy chỉnh';
-                    applyCustomBtn.className = 'btn btn-sm btn-primary';
-                    applyCustomBtn.style.padding = '3px 8px';
-                    applyCustomBtn.style.fontSize = '12px';
-                    applyCustomBtn.style.flex = '0 0 auto';
-
-                    applyCustomBtn.onclick = function() {
-                        const customColor = customColorInput.value;
-                        changeModelColor(gltf.scene, customColor);
-                        // Đặt lại màu cho các nút
-                        document.querySelectorAll('.color-controls button.color-btn').forEach(btn => {
-                            btn.style.border = '2px solid #ddd';
-                            btn.style.boxShadow = 'none';
-                        });
-                    };
-
-                    controlsRow.appendChild(resetBtn);
-                    controlsRow.appendChild(customColorInput);
-                    controlsRow.appendChild(applyCustomBtn);
-
-                    solidColorContent.appendChild(controlsRow);
-
-                    // Tạo controls caro
-                    const checkeredHeader = document.createElement('div');
-                    checkeredHeader.innerHTML = '<div style="margin-bottom: 8px; font-size: 12px; color: #333;">Chọn màu cho họa tiết caro:</div>';
-                    checkeredContent.appendChild(checkeredHeader);
-
-                    // Tạo selector màu chính
-                    const primaryColorLabel = document.createElement('div');
-                    primaryColorLabel.innerText = 'Màu chính:';
-                    primaryColorLabel.style.fontSize = '12px';
-                    primaryColorLabel.style.marginBottom = '4px';
-                    checkeredContent.appendChild(primaryColorLabel);
-
-                    // Tạo grid chọn màu chính
-                    const primaryColorGrid = document.createElement('div');
-                    primaryColorGrid.style.display = 'grid';
-                    primaryColorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-                    primaryColorGrid.style.gap = '6px';
-                    primaryColorGrid.style.marginBottom = '12px';
-
-                    // Tạo selector màu phụ
-                    const secondaryColorLabel = document.createElement('div');
-                    secondaryColorLabel.innerText = 'Màu phụ:';
-                    secondaryColorLabel.style.fontSize = '12px';
-                    secondaryColorLabel.style.marginBottom = '4px';
-
-                    // Tạo grid chọn màu phụ
-                    const secondaryColorGrid = document.createElement('div');
-                    secondaryColorGrid.style.display = 'grid';
-                    secondaryColorGrid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-                    secondaryColorGrid.style.gap = '6px';
-                    secondaryColorGrid.style.marginBottom = '12px';
-
-                    // Thêm nút màu vào grid màu chính và phụ
-                    colors.forEach(color => {
-                        // Nút màu chính
-                        const primaryColorBtn = document.createElement('button');
-                        primaryColorBtn.style.width = '25px';
-                        primaryColorBtn.style.height = '25px';
-                        primaryColorBtn.style.backgroundColor = color.hex;
-                        primaryColorBtn.style.border = '2px solid #ddd';
-                        primaryColorBtn.style.borderRadius = '50%';
-                        primaryColorBtn.style.cursor = 'pointer';
-                        primaryColorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
-                        primaryColorBtn.title = color.name;
-                        primaryColorBtn.dataset.color = color.hex;
-                        primaryColorBtn.className = 'primary-color-btn';
-
-                        // Thêm hiệu ứng hover
-                        primaryColorBtn.onmouseover = function() {
-                            this.style.transform = 'scale(1.1)';
-                        };
-
-                        primaryColorBtn.onmouseout = function() {
-                            this.style.transform = 'scale(1)';
-                        };
-
-                        primaryColorBtn.onclick = function() {
-                            // Cập nhật màu chính
-                            const primaryColor = this.dataset.color;
-                            const secondaryColor = currentCheckeredColors.secondary;
-                            const patternSize = parseInt(patternSizeSlider.value);
-                            const lineWidth = parseFloat(lineWidthSlider.value);
-                            const lineSpacing = parseInt(lineSpacingSlider.value);
-                            const patternType = patternTypeSelect.value;
-
-                            applyCheckeredPattern(gltf.scene, primaryColor, secondaryColor, patternSize, lineWidth, patternType, lineSpacing);
-
-                            // Đánh dấu màu đã chọn
-                            document.querySelectorAll('.primary-color-btn').forEach(btn => {
-                                btn.style.border = '2px solid #ddd';
-                                btn.style.boxShadow = 'none';
-                            });
-                            this.style.border = '2px solid #000';
-                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
-                        };
-
-                        primaryColorGrid.appendChild(primaryColorBtn);
-
-                        // Nút màu phụ
-                        const secondaryColorBtn = document.createElement('button');
-                        secondaryColorBtn.style.width = '25px';
-                        secondaryColorBtn.style.height = '25px';
-                        secondaryColorBtn.style.backgroundColor = color.hex;
-                        secondaryColorBtn.style.border = '2px solid #ddd';
-                        secondaryColorBtn.style.borderRadius = '50%';
-                        secondaryColorBtn.style.cursor = 'pointer';
-                        secondaryColorBtn.style.transition = 'transform 0.2s, border-color 0.2s';
-                        secondaryColorBtn.title = color.name;
-                        secondaryColorBtn.dataset.color = color.hex;
-                        secondaryColorBtn.className = 'secondary-color-btn';
-
-                        // Thêm hiệu ứng hover
-                        secondaryColorBtn.onmouseover = function() {
-                            this.style.transform = 'scale(1.1)';
-                        };
-
-                        secondaryColorBtn.onmouseout = function() {
-                            this.style.transform = 'scale(1)';
-                        };
-
-                        secondaryColorBtn.onclick = function() {
-                            // Cập nhật màu phụ
-                            const primaryColor = currentCheckeredColors.primary;
-                            const secondaryColor = this.dataset.color;
-                            const patternSize = parseInt(patternSizeSlider.value);
-                            const lineWidth = parseFloat(lineWidthSlider.value);
-                            const lineSpacing = parseInt(lineSpacingSlider.value);
-                            const patternType = patternTypeSelect.value;
-
-                            applyCheckeredPattern(gltf.scene, primaryColor, secondaryColor, patternSize, lineWidth, patternType, lineSpacing);
-
-                            // Đánh dấu màu đã chọn
-                            document.querySelectorAll('.secondary-color-btn').forEach(btn => {
-                                btn.style.border = '2px solid #ddd';
-                                btn.style.boxShadow = 'none';
-                            });
-                            this.style.border = '2px solid #000';
-                            this.style.boxShadow = '0 0 5px rgba(0,0,0,0.5)';
-                        };
-
-                        secondaryColorGrid.appendChild(secondaryColorBtn);
-                    });
-
-                    checkeredContent.appendChild(primaryColorGrid);
-                    checkeredContent.appendChild(secondaryColorLabel);
-                    checkeredContent.appendChild(secondaryColorGrid);
-
-                    // Thêm controls chọn màu tùy chỉnh cho caro
-                    const checkeredCustomControls = document.createElement('div');
-                    checkeredCustomControls.style.display = 'flex';
-                    checkeredCustomControls.style.flexDirection = 'column';
-                    checkeredCustomControls.style.gap = '8px';
-
-                    // Hàng màu tùy chỉnh chính
-                    const primaryCustomRow = document.createElement('div');
-                    primaryCustomRow.style.display = 'flex';
-                    primaryCustomRow.style.alignItems = 'center';
-                    primaryCustomRow.style.gap = '5px';
-
-                    const primaryCustomLabel = document.createElement('div');
-                    primaryCustomLabel.innerText = 'Màu chính tùy chỉnh:';
-                    primaryCustomLabel.style.fontSize = '12px';
-                    primaryCustomLabel.style.flex = '1';
-
-                    const primaryCustomInput = document.createElement('input');
-                    primaryCustomInput.type = 'color';
-                    primaryCustomInput.style.width = '30px';
-                    primaryCustomInput.style.height = '30px';
-                    primaryCustomInput.style.border = 'none';
-                    primaryCustomInput.style.borderRadius = '4px';
-                    primaryCustomInput.style.cursor = 'pointer';
-                    primaryCustomInput.style.padding = '0';
-                    primaryCustomInput.value = currentCheckeredColors.primary;
-
-                    primaryCustomRow.appendChild(primaryCustomLabel);
-                    primaryCustomRow.appendChild(primaryCustomInput);
-
-                    // Hàng màu tùy chỉnh phụ
-                    const secondaryCustomRow = document.createElement('div');
-                    secondaryCustomRow.style.display = 'flex';
-                    secondaryCustomRow.style.alignItems = 'center';
-                    secondaryCustomRow.style.gap = '5px';
-
-                    const secondaryCustomLabel = document.createElement('div');
-                    secondaryCustomLabel.innerText = 'Màu phụ tùy chỉnh:';
-                    secondaryCustomLabel.style.fontSize = '12px';
-                    secondaryCustomLabel.style.flex = '1';
-
-                    const secondaryCustomInput = document.createElement('input');
-                    secondaryCustomInput.type = 'color';
-                    secondaryCustomInput.style.width = '30px';
-                    secondaryCustomInput.style.height = '30px';
-                    secondaryCustomInput.style.border = 'none';
-                    secondaryCustomInput.style.borderRadius = '4px';
-                    secondaryCustomInput.style.cursor = 'pointer';
-                    secondaryCustomInput.style.padding = '0';
-                    secondaryCustomInput.value = currentCheckeredColors.secondary;
-
-                    secondaryCustomRow.appendChild(secondaryCustomLabel);
-                    secondaryCustomRow.appendChild(secondaryCustomInput);
-
-                    // Thêm selector kiểu caro
-                    const patternTypeRow = document.createElement('div');
-                    patternTypeRow.style.display = 'flex';
-                    patternTypeRow.style.alignItems = 'center';
-                    patternTypeRow.style.gap = '5px';
-                    patternTypeRow.style.marginTop = '8px';
-
-                    const patternTypeLabel = document.createElement('div');
-                    patternTypeLabel.innerText = 'Kiểu caro:';
-                    patternTypeLabel.style.fontSize = '12px';
-                    patternTypeLabel.style.flex = '1';
-
-                    const patternTypeSelect = document.createElement('select');
-                    patternTypeSelect.style.fontSize = '12px';
-                    patternTypeSelect.style.padding = '2px 5px';
-                    patternTypeSelect.style.borderRadius = '4px';
-                    patternTypeSelect.style.border = '1px solid #ccc';
-
-                    // Thêm các tùy chọn
-                    const checkeredOption = document.createElement('option');
-                    checkeredOption.value = 'checkered';
-                    checkeredOption.text = 'Caro đan xen';
-                    checkeredOption.selected = currentPatternType === 'checkered';
-
-                    const windowpaneOption = document.createElement('option');
-                    windowpaneOption.value = 'windowpane';
-                    windowpaneOption.text = 'Caro cửa sổ';
-                    windowpaneOption.selected = currentPatternType === 'windowpane';
-
-                    const doubleWindowpaneOption = document.createElement('option');
-                    doubleWindowpaneOption.value = 'double-windowpane';
-                    doubleWindowpaneOption.text = 'Caro cửa sổ đôi';
-                    doubleWindowpaneOption.selected = currentPatternType === 'double-windowpane';
-
-                    patternTypeSelect.appendChild(checkeredOption);
-                    patternTypeSelect.appendChild(windowpaneOption);
-                    patternTypeSelect.appendChild(doubleWindowpaneOption);
-
-                    patternTypeSelect.onchange = function() {
-                        currentPatternType = this.value;
-
-                        // Hiển thị/ẩn controls dựa trên kiểu caro
-                        const isWindowpane = currentPatternType === 'windowpane' || currentPatternType === 'double-windowpane';
-                        const isDoubleWindowpane = currentPatternType === 'double-windowpane';
-
-                        lineWidthRow.style.display = isWindowpane ? 'flex' : 'none';
-                        lineSpacingRow.style.display = isDoubleWindowpane ? 'flex' : 'none';
-                    };
-
-                    patternTypeRow.appendChild(patternTypeLabel);
-                    patternTypeRow.appendChild(patternTypeSelect);
-
-                    // Thêm controls chỉnh kích thước caro
-                    const patternSizeRow = document.createElement('div');
-                    patternSizeRow.style.display = 'flex';
-                    patternSizeRow.style.alignItems = 'center';
-                    patternSizeRow.style.gap = '5px';
-                    patternSizeRow.style.marginTop = '8px';
-
-                    const patternSizeLabel = document.createElement('div');
-                    patternSizeLabel.innerText = 'Kích thước ô caro:';
-                    patternSizeLabel.style.fontSize = '12px';
-                    patternSizeLabel.style.flex = '1';
-
-                    const patternSizeSlider = document.createElement('input');
-                    patternSizeSlider.type = 'range';
-                    patternSizeSlider.min = '4';
-                    patternSizeSlider.max = '24';
-                    patternSizeSlider.step = '2';
-                    patternSizeSlider.value = currentCheckeredSize.toString();
-                    patternSizeSlider.style.width = '100px';
-
-                    const patternSizeValue = document.createElement('span');
-                    patternSizeValue.innerText = currentCheckeredSize.toString();
-                    patternSizeValue.style.fontSize = '12px';
-                    patternSizeValue.style.marginLeft = '5px';
-                    patternSizeValue.style.width = '20px';
-                    patternSizeValue.style.textAlign = 'center';
-
-                    patternSizeSlider.oninput = function() {
-                        patternSizeValue.innerText = this.value;
-                    };
-
-                    patternSizeRow.appendChild(patternSizeLabel);
-                    patternSizeRow.appendChild(patternSizeSlider);
-                    patternSizeRow.appendChild(patternSizeValue);
-
-                    // Thêm controls chỉnh độ dày đường kẻ caro
-                    const lineWidthRow = document.createElement('div');
-                    lineWidthRow.style.display = currentPatternType === 'windowpane' ? 'flex' : 'none';
-                    lineWidthRow.style.alignItems = 'center';
-                    lineWidthRow.style.gap = '5px';
-                    lineWidthRow.style.marginTop = '8px';
-
-                    const lineWidthLabel = document.createElement('div');
-                    lineWidthLabel.innerText = 'Độ dày đường kẻ:';
-                    lineWidthLabel.style.fontSize = '12px';
-                    lineWidthLabel.style.flex = '1';
-
-                    const lineWidthSlider = document.createElement('input');
-                    lineWidthSlider.type = 'range';
-                    lineWidthSlider.min = '1';
-                    lineWidthSlider.max = '5';
-                    lineWidthSlider.step = '0.5';
-                    lineWidthSlider.value = currentLineWidth.toString();
-                    lineWidthSlider.style.width = '100px';
-
-                    const lineWidthValue = document.createElement('span');
-                    lineWidthValue.innerText = currentLineWidth.toString();
-                    lineWidthValue.style.fontSize = '12px';
-                    lineWidthValue.style.marginLeft = '5px';
-                    lineWidthValue.style.width = '20px';
-                    lineWidthValue.style.textAlign = 'center';
-
-                    lineWidthSlider.oninput = function() {
-                        lineWidthValue.innerText = this.value;
-                    };
-
-                    lineWidthRow.appendChild(lineWidthLabel);
-                    lineWidthRow.appendChild(lineWidthSlider);
-                    lineWidthRow.appendChild(lineWidthValue);
-
-                    // Thêm controls chỉnh khoảng cách đường kẻ đôi
-                    const lineSpacingRow = document.createElement('div');
-                    lineSpacingRow.style.display = currentPatternType === 'double-windowpane' ? 'flex' : 'none';
-                    lineSpacingRow.style.alignItems = 'center';
-                    lineSpacingRow.style.gap = '5px';
-                    lineSpacingRow.style.marginTop = '8px';
-
-                    const lineSpacingLabel = document.createElement('div');
-                    lineSpacingLabel.innerText = 'Khoảng cách đường kẻ:';
-                    lineSpacingLabel.style.fontSize = '12px';
-                    lineSpacingLabel.style.flex = '1';
-
-                    const lineSpacingSlider = document.createElement('input');
-                    lineSpacingSlider.type = 'range';
-                    lineSpacingSlider.min = '2';
-                    lineSpacingSlider.max = '10';
-                    lineSpacingSlider.step = '1';
-                    lineSpacingSlider.value = currentLineSpacing.toString();
-                    lineSpacingSlider.style.width = '100px';
-
-                    const lineSpacingValue = document.createElement('span');
-                    lineSpacingValue.innerText = currentLineSpacing.toString();
-                    lineSpacingValue.style.fontSize = '12px';
-                    lineSpacingValue.style.marginLeft = '5px';
-                    lineSpacingValue.style.width = '20px';
-                    lineSpacingValue.style.textAlign = 'center';
-
-                    lineSpacingSlider.oninput = function() {
-                        lineSpacingValue.innerText = this.value;
-                    };
-
-                    lineSpacingRow.appendChild(lineSpacingLabel);
-                    lineSpacingRow.appendChild(lineSpacingSlider);
-                    lineSpacingRow.appendChild(lineSpacingValue);
-
-                    // Nút áp dụng màu caro tùy chỉnh
-                    const applyCheckeredBtn = document.createElement('button');
-                    applyCheckeredBtn.innerHTML = 'Áp dụng màu caro';
-                    applyCheckeredBtn.className = 'btn btn-sm btn-primary';
-                    applyCheckeredBtn.style.marginTop = '5px';
-                    applyCheckeredBtn.style.fontSize = '12px';
-
-                    applyCheckeredBtn.onclick = function() {
-                        const primaryColor = primaryCustomInput.value;
-                        const secondaryColor = secondaryCustomInput.value;
-                        const patternSize = parseInt(patternSizeSlider.value);
-                        const lineWidth = parseFloat(lineWidthSlider.value);
-                        const lineSpacing = parseInt(lineSpacingSlider.value);
-                        const patternType = patternTypeSelect.value;
-
-                        // Cập nhật các biến toàn cục
-                        currentCheckeredColors.primary = primaryColor;
-                        currentCheckeredColors.secondary = secondaryColor;
-                        currentCheckeredSize = patternSize;
-                        currentLineWidth = lineWidth;
-                        currentLineSpacing = lineSpacing;
-                        currentPatternType = patternType;
-
-                        // Áp dụng họa tiết với tất cả các tham số
-                        const texture = createPatternTexture(primaryColor, secondaryColor, 512, patternSize, lineWidth, lineSpacing);
-
-                        // Áp dụng texture lên mô hình
-                        applyTextureToModel(gltf.scene, texture);
-
-                        // Đặt lại màu cho các nút
-                        document.querySelectorAll('.primary-color-btn, .secondary-color-btn').forEach(btn => {
-                            btn.style.border = '2px solid #ddd';
-                            btn.style.boxShadow = 'none';
-                        });
-                    };
-
-                    // Thêm nút khôi phục màu gốc cho caro
-                    const resetCheckeredBtn = document.createElement('button');
-                    resetCheckeredBtn.innerHTML = '<i class="fas fa-undo-alt"></i> Khôi phục màu gốc';
-                    resetCheckeredBtn.className = 'btn btn-sm btn-outline-secondary';
-                    resetCheckeredBtn.style.marginTop = '5px';
-                    resetCheckeredBtn.style.fontSize = '12px';
-                    resetCheckeredBtn.style.marginRight = '5px';
-
-                    resetCheckeredBtn.onclick = function() {
-                        resetModelColor(gltf.scene);
-                        // Đặt lại màu cho các nút
-                        document.querySelectorAll('.primary-color-btn, .secondary-color-btn').forEach(btn => {
-                            btn.style.border = '2px solid #ddd';
-                            btn.style.boxShadow = 'none';
-                        });
-                    };
-
-                    // Tạo một hàng cho các nút
-                    const checkeredButtonsRow = document.createElement('div');
-                    checkeredButtonsRow.style.display = 'flex';
-                    checkeredButtonsRow.style.justifyContent = 'space-between';
-
-                    checkeredButtonsRow.appendChild(resetCheckeredBtn);
-                    checkeredButtonsRow.appendChild(applyCheckeredBtn);
-
-                    checkeredCustomControls.appendChild(primaryCustomRow);
-                    checkeredCustomControls.appendChild(secondaryCustomRow);
-                    checkeredCustomControls.appendChild(patternTypeRow);
-                    checkeredCustomControls.appendChild(patternSizeRow);
-                    checkeredCustomControls.appendChild(lineWidthRow);
-                    checkeredCustomControls.appendChild(lineSpacingRow);
-                    checkeredCustomControls.appendChild(checkeredButtonsRow);
-
-                    checkeredContent.appendChild(checkeredCustomControls);
                     viewerContainer.appendChild(colorControls);
 
                     // Thêm viewer vào DOM
@@ -840,11 +539,20 @@
     let scene = null;
     let camera = null;
     let renderer = null;
+    let controls = null;
     let currentCheckeredColors = { primary: '#FFFFFF', secondary: '#000000' };
     let currentCheckeredSize = 12; // Số ô caro mặc định
     let currentPatternType = 'windowpane'; // Kiểu caro mặc định
     let currentLineWidth = 1; // Độ dày đường kẻ caro
     let currentLineSpacing = 3; // Khoảng cách đường kẻ đôi
+    
+    // Biến cho tính năng di chuyển text và sticker
+    let textPlaneMesh = null;
+    let draggableMeshes = [];
+    let isDraggingMesh = false;
+    let currentDraggedMesh = null;
+    let textRaycaster = null;
+    let mouseVector = null;
 
     // Hàm đổi màu mô hình - chỉ đổi màu mesh chính (lớn nhất)
     function changeModelColor(model, colorHex) {
@@ -1941,6 +1649,300 @@
 
         // Render lại scene
         renderer.render(scene, camera);
+    }
+
+    // Hàm tạo texture chữ trên bánh và tạo thành Label 3D di chuyển được
+    function applyTextOnCake(model, textContent, textColor, bgColor) {
+        // Lưu lại mô hình hiện tại
+        currentModel = model;
+        console.log('Applying text on cake as movable plane:', textContent, textColor, bgColor);
+
+        // Xóa text plane cũ nếu có
+        if (textPlaneMesh) {
+            scene.remove(textPlaneMesh);
+            draggableMeshes = draggableMeshes.filter(m => m !== textPlaneMesh);
+            if (textPlaneMesh.geometry) textPlaneMesh.geometry.dispose();
+            if (textPlaneMesh.material && textPlaneMesh.material.map) textPlaneMesh.material.map.dispose();
+            if (textPlaneMesh.material) textPlaneMesh.material.dispose();
+            textPlaneMesh = null;
+        }
+
+        // Nếu nội dung trống, không hiển thị gì cả
+        if (!textContent || textContent.trim() === '') return;
+
+        // Định dạng và kích thước font chữ
+        const fontPx = 100;
+        const padding = 40;
+        
+        // Tạo canvas ảo để đo kích thước chữ thực tế tránh bị cắt xén
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.font = `bold ${fontPx}px "Comic Sans MS", cursive, sans-serif`;
+        
+        // Cắt text thành nhiều dòng nếu quá dài, VÀ tôn trọng phím Enter (\n)
+        let lines = [];
+        const userLines = textContent.split('\n');
+        const maxTextWidth = 800;
+
+        userLines.forEach(lineText => {
+            const words = lineText.split(' ');
+            let currentLine = '';
+            
+            for (let i = 0; i < words.length; i++) {
+                let testLine = currentLine + words[i] + ' ';
+                let metrics = tempCtx.measureText(testLine);
+                if (metrics.width > maxTextWidth && i > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = words[i] + ' ';
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            if (currentLine.trim() !== '') {
+                lines.push(currentLine.trim());
+            } else if (words.length === 1 && words[0] === '') {
+                // Giữ lại dòng block khoảng trắng (Enter nhiều lần)
+                lines.push('');
+            }
+        });
+
+        // Tính toán kích thước của canvas cuối cùng dựa trên các dòng văn bản
+        let maxLineWidth = 0;
+        lines.forEach(line => {
+            const width = tempCtx.measureText(line).width;
+            if (width > maxLineWidth) maxLineWidth = width;
+        });
+
+        const actualCanvasWidth = maxLineWidth + padding * 2;
+        const lineHeight = fontPx * 1.3;
+        const actualCanvasHeight = (lines.length * lineHeight) + padding * 2;
+
+        // Tạo canvas chính thức
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(actualCanvasWidth, 256);
+        canvas.height = Math.max(actualCanvasHeight, 128);
+        const ctx = canvas.getContext('2d');
+
+        // Vẽ thẻ nền có bo tròn góc
+        if (bgColor !== 'transparent') {
+            ctx.fillStyle = bgColor;
+            const radius = 25;
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(canvas.width - radius, 0);
+            ctx.quadraticCurveTo(canvas.width, 0, canvas.width, radius);
+            ctx.lineTo(canvas.width, canvas.height - radius);
+            ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - radius, canvas.height);
+            ctx.lineTo(radius, canvas.height);
+            ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - radius);
+            ctx.lineTo(0, radius);
+            ctx.quadraticCurveTo(0, 0, radius, 0);
+            ctx.closePath();
+            ctx.fill();
+
+            // Thêm viền lợt để giả làm kem viền
+            ctx.lineWidth = 12;
+            ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+            ctx.stroke();
+        } else {
+            // Nền trong suốt
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Vẽ chữ
+        ctx.fillStyle = textColor;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${fontPx}px "Comic Sans MS", cursive, sans-serif`;
+
+        const startY = (canvas.height - (lines.length * lineHeight)) / 2 + (lineHeight / 2);
+        
+        for (let j = 0; j < lines.length; j++) {
+            // Hiệu ứng bóng nổi giống kem
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 8;
+            ctx.shadowOffsetX = 4;
+            ctx.shadowOffsetY = 4;
+            
+            ctx.fillText(lines[j], canvas.width / 2, startY + (j * lineHeight));
+        }
+
+        // Khởi tạo texture
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        
+        // Tính lệ aspect ratio để dựng mặt phẳng Plane geometry
+        const aspect = canvas.width / canvas.height;
+        
+        // Xác định kích thước của mặt bánh và điểm cao nhất
+        let mainMesh = findMainMesh(model);
+        let cakeSizeX = 2; // Dự phòng
+        let highestY = 1;
+
+        if (mainMesh) {
+            const box = new THREE.Box3().setFromObject(mainMesh);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            cakeSizeX = size.x;
+            highestY = box.max.y;
+        } else {
+            const box = new THREE.Box3().setFromObject(model);
+            highestY = box.max.y;
+            cakeSizeX = box.max.x - box.min.x;
+        }
+
+        // Bảng tên hiển thị ước lượng bằng 50% đến 60% mặt bánh
+        const planeWidth = cakeSizeX * 0.55; 
+        const planeHeight = planeWidth / aspect;
+
+        const planeGeom = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const planeMat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            depthTest: true,
+            depthWrite: false, // Ngăn z-fighting
+            side: THREE.DoubleSide
+        });
+
+        // Tạo Mesh khung chữ
+        textPlaneMesh = new THREE.Mesh(planeGeom, planeMat);
+        textPlaneMesh.name = 'MovableTextPlane';
+        
+        // Xoay sao cho nó nằm ngang (song song với mặt bánh)
+        textPlaneMesh.rotation.x = -Math.PI / 2;
+        // Đặt ở giữa và nâng lên xíu so với điểm cao nhất
+        textPlaneMesh.position.set(0, highestY + 0.05, 0); 
+
+        scene.add(textPlaneMesh);
+        draggableMeshes.push(textPlaneMesh);
+        
+        showDragHint();
+    }
+
+    function applyStickerOnCake(model, emoji, dropPosition = null) {
+        // Định dạng và kích thước font chữ
+        const fontPx = 150;
+        const padding = 20;
+
+        const tempCanvas = document.createElement('canvas');
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.font = `bold ${fontPx}px sans-serif`;
+        const metrics = tempCtx.measureText(emoji);
+        const emojiWidth = metrics.width;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(emojiWidth + padding * 2, 200);
+        canvas.height = fontPx + padding * 2;
+        const ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = 'rgba(0,0,0,0)'; // test transparent
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `bold ${fontPx}px sans-serif`;
+
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 4;
+        
+        ctx.fillText(emoji, canvas.width / 2, canvas.height / 2 + fontPx * 0.1);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        
+        const aspect = canvas.width / canvas.height;
+        
+        let mainMesh = findMainMesh(model);
+        let cakeSizeX = 2; // Dự phòng
+        let highestY = 1;
+
+        if (mainMesh) {
+            const box = new THREE.Box3().setFromObject(mainMesh);
+            const size = new THREE.Vector3();
+            box.getSize(size);
+            cakeSizeX = size.x;
+            highestY = box.max.y;
+        } else {
+            const box = new THREE.Box3().setFromObject(model);
+            highestY = box.max.y;
+            cakeSizeX = box.max.x - box.min.x;
+        }
+
+        const planeWidth = cakeSizeX * 0.2; // Sticker nhỏ hơn text
+        const planeHeight = planeWidth / aspect;
+
+        const planeGeom = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        const planeMat = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            depthTest: true,
+            depthWrite: false, // Ngăn z-fighting
+            side: THREE.DoubleSide
+        });
+
+        const stickerMesh = new THREE.Mesh(planeGeom, planeMat);
+        stickerMesh.name = 'MovableStickerPlane';
+        
+        stickerMesh.rotation.x = -Math.PI / 2;
+        
+        if (dropPosition) {
+            // Đặt đúng vị trí thả rớt chuột theo toạ độ (X, Z) nhận được
+            stickerMesh.position.x = dropPosition.x;
+            stickerMesh.position.z = dropPosition.z;
+            // Nhưng luôn ép độ cao (Y) bằng với điểm cao nhất của bánh để không bị chìm
+            stickerMesh.position.y = highestY + 0.05 + Math.random() * 0.02;
+        } else {
+            // Mặc định random rơi ngẫu nhiên
+            const randX = (Math.random() - 0.5) * cakeSizeX * 0.5;
+            const randZ = (Math.random() - 0.5) * cakeSizeX * 0.5;
+            // Đặt ngẫu nhiên trên bề mặt bánh và hơi nhỉnh cao y tránh z-fighting
+            stickerMesh.position.set(randX, highestY + 0.05 + Math.random() * 0.02, randZ); 
+        }
+
+        // Apply scale directly matching the global slider, or leave as default. Let's use slider.
+        const sliderInput = document.querySelector('input[type="range"]'); // textScaleInput
+        if (sliderInput) {
+            const scaleVal = parseFloat(sliderInput.value);
+            stickerMesh.scale.set(scaleVal, scaleVal, 1);
+        }
+
+        scene.add(stickerMesh);
+        draggableMeshes.push(stickerMesh);
+        
+        showDragHint();
+    }
+
+    // Function rút gọn gợi ý
+    function showDragHint() {
+        if (!document.getElementById('drag-hint-toast')) {
+            const hint = document.createElement('div');
+            hint.id = 'drag-hint-toast';
+            hint.innerHTML = '<i class="fas fa-hand-pointer"></i> Bạn có thể dùng chuột kéo thả nhãn trên bánh để di chuyển vị trí!';
+            hint.style.position = 'absolute';
+            hint.style.bottom = '20px';
+            hint.style.left = '50%';
+            hint.style.transform = 'translateX(-50%)';
+            hint.style.background = 'rgba(0,0,0,0.7)';
+            hint.style.color = 'white';
+            hint.style.padding = '10px 20px';
+            hint.style.borderRadius = '30px';
+            hint.style.zIndex = '1000';
+            hint.style.fontSize = '14px';
+            hint.style.pointerEvents = 'none';
+            hint.style.transition = 'opacity 0.5s';
+            
+            const container = document.getElementById('model-container');
+            if (container) container.appendChild(hint);
+            
+            setTimeout(() => {
+                if (hint) {
+                    hint.style.opacity = '0';
+                    setTimeout(() => { if (hint.parentNode) hint.parentNode.removeChild(hint); }, 500);
+                }
+            }, 5000);
+        }
     }
 
     // Function to change the 3D model
