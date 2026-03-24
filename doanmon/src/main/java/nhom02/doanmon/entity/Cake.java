@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "cakes")
+@Table(name = "products")
 public class Cake {
 
     @Id
@@ -32,6 +32,12 @@ public class Cake {
 
     @Column(length = 255)
     private String model3D;
+
+    @Column(unique = true, length = 100)
+    private String productCode;
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer quantity = 0;
 
     public Cake() {
     }
@@ -100,5 +106,21 @@ public class Cake {
 
     public void setModel3D(String model3D) {
         this.model3D = model3D;
+    }
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

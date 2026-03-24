@@ -40,7 +40,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/", "/cakes", "/cakes/**", "/css/**", "/js/**",
                                                                 "/images/**", "/register", "/login")
                                                 .permitAll()
-                                                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                                                .requestMatchers("/admin/**", "/api/import/**").hasAuthority("ADMIN")
                                                 .anyRequest().authenticated())
                                 .formLogin(form -> form
                                                 .loginPage("/login")
