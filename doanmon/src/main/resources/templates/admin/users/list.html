@@ -1,6 +1,8 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta charset="UTF-8" />
     <title>Manage Users - Admin</title>
     <link rel="stylesheet" href="/css/style.css" />
@@ -10,7 +12,12 @@
     <header class="header">
       <div class="container">
         <h1 class="logo">🍰 Admin Dashboard</h1>
-        <nav class="nav">
+        <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <nav class="nav">
           <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
           <a href="/admin/categories" class="nav-link">Manage Categories</a>
           <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>

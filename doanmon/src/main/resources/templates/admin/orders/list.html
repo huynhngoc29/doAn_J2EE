@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta charset="UTF-8">
     <title>Manage Orders - Admin</title>
     <link rel="stylesheet" href="/css/style.css" />
@@ -39,6 +41,11 @@
     <header class="header">
         <div class="container">
             <h1 class="logo">🍰 Admin Dashboard</h1>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav">
                 <a href="/admin/cakes" class="nav-link">Cakes</a>
                 <a href="/admin/users" class="nav-link">Users</a>
