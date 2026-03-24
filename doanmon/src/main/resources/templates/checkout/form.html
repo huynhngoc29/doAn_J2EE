@@ -44,10 +44,14 @@
                     <tr th:each="item : ${cart.items}" style="border-bottom: 1px solid #f9f9f9;">
                         <td style="padding: 20px;">
                             <div style="display: flex; align-items: center; gap: 15px;">
-                                <img th:src="${item.cake.image}"
+                                <img th:if="${item.customImage != null}" th:src="${item.customImage}"
+                                    style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #ff69b4;">
+                                <img th:unless="${item.customImage != null}" th:src="${item.cake.image}"
                                     style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;">
-                                <span style="font-weight: 600; color: var(--text-color);"
-                                    th:text="${item.cake.name}">Cake Name</span>
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="font-weight: 600; color: var(--text-color);" th:text="${item.cake.name}">Cake Name</span>
+                                    <span th:if="${item.customImage != null}" style="font-size: 0.8rem; color: #ff69b4; font-weight: bold;">[Custom Design]</span>
+                                </div>
                             </div>
                         </td>
                         <td style="padding: 20px; font-weight: 600; color: var(--light-text);"

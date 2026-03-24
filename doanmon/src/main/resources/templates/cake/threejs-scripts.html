@@ -41,8 +41,8 @@
             camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
             camera.position.z = 5;
 
-            // Tạo renderer và lưu vào biến toàn cục
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // Tạo renderer và lưu vào biến toàn cục, thêm preserveDrawingBuffer để hỗ trợ chụp ảnh màn hình
+            renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -121,6 +121,18 @@
                                 // Cập nhật vị trí kéo
                                 currentDraggedMesh.position.x = intersectPoint.x;
                                 currentDraggedMesh.position.z = intersectPoint.z;
+                                
+                                // Tự động dò bề mặt bánh để hạ thấp/nâng cao Y cho bám sát
+                                if (typeof gltf !== 'undefined' && gltf && gltf.scene) {
+                                    const yRaycaster = new THREE.Raycaster(
+                                        new THREE.Vector3(intersectPoint.x, 100, intersectPoint.z),
+                                        new THREE.Vector3(0, -1, 0)
+                                    );
+                                    const yIntersects = yRaycaster.intersectObject(gltf.scene, true);
+                                    if (yIntersects.length > 0) {
+                                        currentDraggedMesh.position.y = yIntersects[0].point.y + 0.05;
+                                    }
+                                }
                             }
                         } else if (draggableMeshes.length > 0) {
                             // Nếu đang hover chuột lên chữ/sticker thì đổi trỏ chuột thành hình bàn tay để user biết
@@ -1791,6 +1803,13 @@
             cakeSizeX = box.max.x - box.min.x;
         }
 
+        // Tìm độ cao thực tế tại trung tâm (0,0) để chữ sát mặt bánh hơn (không nổi quá cao do trang trí)
+        const centerRaycaster = new THREE.Raycaster(new THREE.Vector3(0, highestY + 5, 0), new THREE.Vector3(0, -1, 0));
+        const centerIntersects = centerRaycaster.intersectObject(model, true);
+        if (centerIntersects.length > 0) {
+            highestY = centerIntersects[0].point.y;
+        }
+
         // Bảng tên hiển thị ước lượng bằng 50% đến 60% mặt bánh
         const planeWidth = cakeSizeX * 0.55; 
         const planeHeight = planeWidth / aspect;
@@ -1891,14 +1910,23 @@
             // Đặt đúng vị trí thả rớt chuột theo toạ độ (X, Z) nhận được
             stickerMesh.position.x = dropPosition.x;
             stickerMesh.position.z = dropPosition.z;
-            // Nhưng luôn ép độ cao (Y) bằng với điểm cao nhất của bánh để không bị chìm
-            stickerMesh.position.y = highestY + 0.05 + Math.random() * 0.02;
+            // Lấy độ cao y thực tế để nhãn sát với bề mặt bánh thay vì lอย lอย ở điểm cao nhất
+            stickerMesh.position.y = dropPosition.y + 0.05 + Math.random() * 0.02;
         } else {
             // Mặc định random rơi ngẫu nhiên
             const randX = (Math.random() - 0.5) * cakeSizeX * 0.5;
             const randZ = (Math.random() - 0.5) * cakeSizeX * 0.5;
+            
+            // Tìm độ cao thực tế tại vị trí ngẫu nhiên thay vì cao nhất
+            let targetY = highestY;
+            const randRay = new THREE.Raycaster(new THREE.Vector3(randX, highestY + 5, randZ), new THREE.Vector3(0, -1, 0));
+            const randIntersects = randRay.intersectObject(model, true);
+            if (randIntersects.length > 0) {
+                targetY = randIntersects[0].point.y;
+            }
+            
             // Đặt ngẫu nhiên trên bề mặt bánh và hơi nhỉnh cao y tránh z-fighting
-            stickerMesh.position.set(randX, highestY + 0.05 + Math.random() * 0.02, randZ); 
+            stickerMesh.position.set(randX, targetY + 0.05 + Math.random() * 0.02, randZ); 
         }
 
         // Apply scale directly matching the global slider, or leave as default. Let's use slider.
@@ -1972,6 +2000,14 @@
     const ThreeModelViewer = {
         init: function(containerId, modelUrl) {
             return show3DModel(containerId, modelUrl);
+        },
+        getSnapshot: function() {
+            if (renderer && renderer.domElement) {
+                // Render một frame cuối trước khi chụp để đảm bảo ảnh không trống
+                renderer.render(scene, camera);
+                return renderer.domElement.toDataURL('image/png');
+            }
+            return null;
         }
     };
 

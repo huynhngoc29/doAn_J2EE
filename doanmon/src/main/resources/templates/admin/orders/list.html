@@ -70,8 +70,8 @@
                         <th>Update Status</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="order : ${orders}">
+                <tbody th:each="order : ${orders}">
+                    <tr style="background-color: #f8f9fa;">
                         <td th:text="${order.id}">1</td>
                         <td th:text="${order.user != null ? order.user.username : 'Guest'}">User</td>
                         <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">Date</td>
@@ -95,9 +95,47 @@
                             </form>
                         </td>
                     </tr>
+                    <tr>
+                        <td colspan="7" style="padding: 10px 20px; border-bottom: 2px solid #dee2e6;">
+                            <strong style="display: block; margin-bottom: 10px;">Order Items:</strong>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <div th:each="item : ${order.items}" style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px;">
+                                    <img th:if="${item.customImage != null}" th:src="${item.customImage}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px; border: 2px solid #ff69b4; cursor: pointer;" onclick="openImageModal(this.src)" title="Nhấn để xem ảnh phóng to">
+                                    <img th:unless="${item.customImage != null}" th:src="${item.cake.image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: bold;" th:text="${item.cake.name}">Cake</div>
+                                        <div th:if="${item.customImage != null}" style="color: #ff69b4; font-size: 0.85em; font-weight: bold;">
+                                            Khách có thiết kế riêng 
+                                            <button style="margin-left: 10px; padding: 3px 10px; border-radius: 4px; border: 1px solid #ff69b4; background: white; color: #ff69b4; cursor: pointer; font-weight: bold;" th:data-img="${item.customImage}" onclick="openImageModal(this.getAttribute('data-img'))">🔍 Xem ảnh full size để làm bánh</button>
+                                        </div>
+                                        <div style="font-size: 0.9em; color: #666;">
+                                            <span th:text="${item.quantity} + ' x ' + ${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">1 x 0</span>
+                                        </div>
+                                    </div>
+                                    <div style="font-weight: bold; width: 120px; text-align: right;" th:text="${#numbers.formatDecimal(item.getTotal(), 0, 'COMMA', 0, 'POINT')} + ' VND'">0</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
     </main>
+
+    <!-- Modal Xem Ảnh Full Size -->
+    <div id="imageModal" style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.9);">
+        <span onclick="closeImageModal()" style="position: absolute; top: 15px; right: 35px; color: #f1f1f1; font-size: 40px; font-weight: bold; cursor: pointer;">&times;</span>
+        <img class="modal-content" id="modalImg" style="margin: auto; display: block; max-width: 90%; max-height: 90%; margin-top: 5%; border-radius: 10px;">
+    </div>
+
+    <script>
+        function openImageModal(src) {
+            document.getElementById('imageModal').style.display = "block";
+            document.getElementById('modalImg').src = src;
+        }
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = "none";
+        }
+    </script>
 </body>
 </html>

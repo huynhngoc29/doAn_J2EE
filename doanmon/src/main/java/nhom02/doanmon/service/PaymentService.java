@@ -52,6 +52,9 @@ public class PaymentService {
             PaymentItem pi = new PaymentItem();
             pi.setCake(ci.getCake());
             pi.setQuantity(ci.getQuantity());
+            if (ci.getCustomImage() != null) {
+                pi.setCustomImage(ci.getCustomImage());
+            }
             double priceVnd = Math.round(ci.getCake().getPrice() * 23000);
             pi.setPrice(priceVnd);
             payment.addItem(pi);
