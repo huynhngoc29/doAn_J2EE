@@ -44,6 +44,7 @@
               <th>Image</th>
               <th>Name</th>
               <th>Category</th>
+              <th>Quantity</th>
               <th>Price</th>
               <th>Actions</th>
             </tr>
@@ -60,6 +61,7 @@
               </td>
               <td th:text="${cake.name}">Cake Name</td>
               <td th:text="${cake.category != null ? cake.category.name : ''}">Category</td>
+              <td th:text="${cake.quantity}" style="font-weight: bold; text-align: center;">0</td>
               <td th:text="${'$' + cake.price}">$10.00</td>
               <td>
                 <div class="admin-actions">

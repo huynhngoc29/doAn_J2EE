@@ -43,7 +43,7 @@ public class Cake {
     public Cake() {
     }
 
-    public Cake(Long id, String name, Double price, String description, String image, Category category, String model3D) {
+    public Cake(Long id, String name, Double price, String description, String image, Category category, String model3D, int quantity) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -51,6 +51,7 @@ public class Cake {
         this.image = image;
         this.category = category;
         this.model3D = model3D;
+        this.quantity = quantity;
     }
 
     public Long getId() {

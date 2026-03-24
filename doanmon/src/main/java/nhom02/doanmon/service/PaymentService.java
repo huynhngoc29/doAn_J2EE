@@ -17,6 +17,9 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private nhom02.doanmon.repository.CakeRepository cakeRepository;
+
     // VNPay configuration (from application.properties)
     @org.springframework.beans.factory.annotation.Value("${vnp.tmnCode}")
     private String vnpTmnCode;
@@ -49,13 +52,20 @@ public class PaymentService {
         payment.setTotalAmount(totalVnd);
 
         for (CartItem ci : cart.getItems()) {
+            nhom02.doanmon.entity.Cake cake = ci.getCake();
+            if (cake.getQuantity() < ci.getQuantity()) {
+                throw new IllegalArgumentException("Not enough stock for " + cake.getName() + " (Requested: " + ci.getQuantity() + " - Stock: " + cake.getQuantity() + ")");
+            }
+            cake.setQuantity(cake.getQuantity() - ci.getQuantity());
+            cakeRepository.save(cake);
+
             PaymentItem pi = new PaymentItem();
-            pi.setCake(ci.getCake());
+            pi.setCake(cake);
             pi.setQuantity(ci.getQuantity());
             if (ci.getCustomImage() != null) {
                 pi.setCustomImage(ci.getCustomImage());
             }
-            double priceVnd = Math.round(ci.getCake().getPrice() * 23000);
+            double priceVnd = Math.round(cake.getPrice() * 23000);
             pi.setPrice(priceVnd);
             payment.addItem(pi);
         }
