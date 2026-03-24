@@ -27,8 +27,9 @@ public class Cake {
     @Column(length = 255)
     private String image;
 
-    @Column(length = 50)
-    private String category;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(length = 255)
     private String model3D;
@@ -42,7 +43,7 @@ public class Cake {
     public Cake() {
     }
 
-    public Cake(Long id, String name, Double price, String description, String image, String category, String model3D) {
+    public Cake(Long id, String name, Double price, String description, String image, Category category, String model3D) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -92,11 +93,11 @@ public class Cake {
         this.image = image;
     }
 
-    public String getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 

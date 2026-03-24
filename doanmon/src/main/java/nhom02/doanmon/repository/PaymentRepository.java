@@ -9,4 +9,8 @@ import java.util.List;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByUserId(Long userId);
+    List<Payment> findByCreatedAtBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+    long countByStatusIn(List<String> statuses);
+    long countByUserIdAndUserReadFalse(Long userId);
+    long countByAdminReadFalse();
 }

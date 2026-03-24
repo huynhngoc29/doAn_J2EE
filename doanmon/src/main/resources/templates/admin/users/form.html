@@ -40,6 +40,10 @@
         <div class="container">
             <h1 class="logo">Admin Dashboard</h1>
             <nav class="nav">
+                <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
+                <a href="/admin/categories" class="nav-link">Manage Categories</a>
+                <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>
+                <a href="/admin/revenue" class="nav-link">Revenue</a>
                 <a href="/admin/users" class="nav-link">Back to Users List</a>
             </nav>
         </div>

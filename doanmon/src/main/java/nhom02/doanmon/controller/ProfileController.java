@@ -16,6 +16,9 @@ public class ProfileController {
     @Autowired
     private UserRepository userRepository;
 
+            @Autowired
+    private nhom02.doanmon.repository.PaymentRepository paymentRepository;
+
     @GetMapping("/profile")
     public String profile(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -28,6 +31,9 @@ public class ProfileController {
             String fullName = null;
             String provider = "LOCAL";
             String roles = "";
+            java.util.List<nhom02.doanmon.entity.Payment> orders = new java.util.ArrayList<>();
+
+            User user = null;
 
             // Check if logged in via OAuth2 (Google)
             if (authentication.getPrincipal() instanceof OAuth2User) {
@@ -40,10 +46,11 @@ public class ProfileController {
                     .stream()
                     .map(auth -> auth.getAuthority())
                     .toList());
+                user = userRepository.findByUsername(username).orElse(null);
             } else {
                 // Regular form login
                 username = authentication.getName();
-                User user = userRepository.findByUsername(username).orElse(null);
+                user = userRepository.findByUsername(username).orElse(null);
                 
                 if (user != null) {
                     email = user.getEmail();
@@ -56,11 +63,30 @@ public class ProfileController {
                 }
             }
 
+            if (user != null && user.getId() != null) {
+                orders = paymentRepository.findByUserId(user.getId());
+                // sort orders by newest
+                orders.sort((a,b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+
+                boolean changed = false;
+                for (nhom02.doanmon.entity.Payment p : orders) {
+                    if (!p.isUserRead()) {
+                        p.setUserRead(true);
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    paymentRepository.saveAll(orders);
+                }
+            }
+
+            model.addAttribute("orders", orders);
             model.addAttribute("username", username);
             model.addAttribute("email", email);
             model.addAttribute("fullName", fullName);
             model.addAttribute("provider", provider);
             model.addAttribute("roles", roles);
+            model.addAttribute("unreadUpdateCount", 0);
             model.addAttribute("authenticated", true);
         } else {
             model.addAttribute("authenticated", false);
