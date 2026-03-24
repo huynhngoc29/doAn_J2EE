@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User Role - Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">Admin Dashboard</h1>
+            <nav class="nav">
+                <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
+                <a href="/admin/categories" class="nav-link">Manage Categories</a>
+                <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>
+                <a href="/admin/revenue" class="nav-link">Revenue</a>
+                <a href="/admin/users" class="nav-link">Back to Users List</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <div class="form-container">
+            <h2 class="section-title">Edit User Role for <span th:text="${user.username}"></span></h2>
+
+            <form th:action="@{/admin/users/update-role}" method="post">
+                <input type="hidden" name="userId" th:value="${user.id}">
+
+                <div class="form-group">
+                    <label>Current Roles:</label>
+                    <div>
+                        <span th:each="r : ${user.roles}" th:text="${r.name} + ' '"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Select New Role:</label>
+                    <select name="role" class="form-control" required>
+                        <option value="USER" th:selected="${currentRole == 'USER'}">USER</option>
+                        <option value="ADMIN" th:selected="${currentRole == 'ADMIN'}">ADMIN</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Role</button>
+            </form>
+        </div>
+    </main>
+
+</body>
+
+</html>

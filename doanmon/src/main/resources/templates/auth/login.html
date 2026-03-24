@@ -1,0 +1,126 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login - Sweet Delights</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+      .auth-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      .btn-block {
+        width: 100%;
+        display: block;
+        text-align: center;
+      }
+
+      .google-btn {
+        background-color: #dd4b39;
+        color: white;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">🍰 Sweet Delights</h1>
+        <nav class="nav">
+          <a href="/cakes" class="nav-link">Home</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="auth-container">
+      <h2 style="text-align: center; margin-bottom: 20px">Login</h2>
+
+      <div
+        th:if="${param.error}"
+        style="color: red; text-align: center; margin-bottom: 10px"
+      >
+        Invalid username or password.
+      </div>
+      <div
+        th:if="${param.disabled}"
+        style="color: red; text-align: center; margin-bottom: 10px"
+      >
+        Tài khoản đã bị khóa, vui lòng liên hệ admin.
+      </div>
+      <div
+        th:if="${param.logout}"
+        style="color: green; text-align: center; margin-bottom: 10px"
+      >
+        You have been logged out.
+      </div>
+      <div
+        th:if="${param.success}"
+        style="color: green; text-align: center; margin-bottom: 10px"
+      >
+        Registration successful! Please login.
+      </div>
+
+      <form th:action="@{/login}" method="post">
+        <div class="form-group">
+          <label>Username</label>
+          <input
+            type="text"
+            name="username"
+            class="form-control"
+            placeholder="Enter username"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            class="form-control"
+            placeholder="Enter password"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Login</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 15px">
+        <span>Or</span>
+      </div>
+
+      <a
+        href="/oauth2/authorization/google"
+        class="btn google-btn btn-block"
+        style="
+          padding: 9px;
+          text-decoration: none;
+          box-sizing: border-box;
+          border: none;
+        "
+        >Login with Google</a
+      >
+
+      <p style="text-align: center; margin-top: 20px">
+        Don't have an account? <a href="/register">Register here</a>
+      </p>
+    </div>
+  </body>
+</html>

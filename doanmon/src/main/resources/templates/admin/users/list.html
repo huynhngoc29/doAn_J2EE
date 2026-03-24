@@ -1,0 +1,96 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Manage Users - Admin</title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="container">
+        <h1 class="logo">🍰 Admin Dashboard</h1>
+        <nav class="nav">
+          <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
+          <a href="/admin/categories" class="nav-link">Manage Categories</a>
+          <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>
+          <a href="/admin/revenue" class="nav-link">Revenue</a>
+          <a href="/cakes" class="nav-link">Main Site</a>
+          <a href="/logout" class="nav-link">Logout</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content container">
+      <h2 class="section-title">Manage Users</h2>
+
+      <div th:if="${error}" class="admin-alert" th:text="${error}"></div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th class="admin-col-id">ID</th>
+              <th>Username</th>
+              <th class="admin-col-email">Email</th>
+              <th class="admin-col-name">Full Name</th>
+              <th class="admin-col-role">Roles</th>
+              <th class="admin-col-status">Status</th>
+              <th class="admin-col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="user : ${users}">
+              <td class="admin-col-id" th:text="${user.id}">1</td>
+              <td th:text="${user.username}">user</td>
+              <td class="admin-col-email" th:text="${user.email}">
+                user@email.com
+              </td>
+              <td class="admin-col-name" th:text="${user.fullName}">
+                Full Name
+              </td>
+              <td class="admin-col-role">
+                <span
+                  th:each="role : ${user.roles}"
+                  th:text="${role.name} + ' '"
+                  >USER</span
+                >
+              </td>
+              <td class="admin-col-status">
+                <span
+                  th:text="${user.enabled ? 'Active' : 'Disabled'}"
+                  th:class="${user.enabled ? 'status-active' : 'status-disabled'}"
+                  >Active</span
+                >
+              </td>
+              <td
+                class="admin-col-actions"
+                th:with="isAdmin=${user.roles.![name].contains('ADMIN')}"
+              >
+                <th:block th:if="${!isAdmin}">
+                  <div class="admin-actions">
+                    <a
+                      th:href="@{/admin/users/edit/{id}(id=${user.id})}"
+                      class="btn btn-secondary"
+                      >Edit Role</a
+                    >
+                    <a
+                      th:href="@{/admin/users/toggle-status/{id}(id=${user.id})}"
+                      th:class="${user.enabled ? 'btn btn-secondary' : 'btn btn-primary'}"
+                      th:text="${user.enabled ? 'Disable' : 'Enable'}"
+                      onclick="return confirm('Are you sure?');"
+                      >Disable</a
+                    >
+                  </div>
+                </th:block>
+                <span th:if="${isAdmin}" class="admin-protected"
+                  >Admin Protected</span
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </body>
+</html>

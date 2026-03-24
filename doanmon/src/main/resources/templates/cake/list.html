@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sweet Delights - Premium Cake Shop</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link active">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+
+                <a th:if="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/admin/cakes" class="nav-link"
+                    style="color: var(--primary-color);">Admin Panel</a>
+
+                <a href="#" class="nav-link">Contact</a>
+
+                <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
+                    class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
+                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container" style="flex-direction: column;">
+            <h1>Taste the Happiness</h1>
+            <p>Handcrafted with love, baked to perfection. Discover our premium selection of cakes for every occasion.
+            </p>
+        </div>
+    </section>
+
+    <main class="main-content container" style="flex-direction: column; align-items: stretch;">
+        <h2 class="section-title">Our Famous Cakes</h2>
+
+        <div class="cake-grid">
+            <div th:each="cake : ${cakes}" class="cake-card">
+                <div class="cake-image">
+                    <!-- Check if image exists, otherwise show placeholder -->
+                    <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/400x300/ff9a9e/white?text=Sweet+Delights'}"
+                        th:alt="${cake.name}">
+                </div>
+                <div class="cake-info">
+                    <span class="cake-category" th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
+                    <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <p class="cake-price" style="margin-bottom: 0;" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                        <span th:if="${cake.quantity > 0}" style="font-size: 0.9em; color: #28a745; font-weight: bold;">In Stock: [[${cake.quantity}]]</span>
+                        <span th:if="${cake.quantity <= 0}" style="font-size: 0.9em; color: #dc3545; font-weight: bold;">Out of Stock</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                        <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary" style="flex: 1; text-align: center; padding: 10px;">Details</a>
+                        
+                        <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                            <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart" style="flex: 1; text-align: center; padding: 10px;">Add to Cart</a>
+                            <button th:if="${cake.quantity <= 0}" class="btn btn-primary" style="flex: 1; opacity: 0.5; cursor: not-allowed; padding: 10px;" disabled>Out of Stock</button>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.ajax-add-to-cart').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+
+                fetch(url, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) return response.json();
+                        throw new Error('Something went wrong');
+                    })
+                    .then(data => {
+                        // Update cart size
+                        const cartSpans = document.querySelectorAll('a[href="/cart"] span');
+                        cartSpans.forEach(span => span.textContent = data.cartSize);
+
+                        // Show fancy toast notification
+                        showToast('Đã thêm sản phẩm vào giỏ hàng thành công! 🍰');
+                    })
+                    .catch(error => {
+                        showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+                    });
+            });
+        });
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '30px';
+            toast.style.right = '30px';
+            toast.style.backgroundColor = isError ? '#e74c3c' : '#4CAF50';
+            toast.style.color = 'white';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '5px';
+            toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '1000';
+            toast.style.fontSize = '16px';
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.transform = 'translateY(100px)';
+            toast.style.opacity = '0';
+
+            document.body.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

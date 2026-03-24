@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cake Detail - Sweet Delights</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <nav class="nav">
+                <a href="/cakes" class="nav-link">Home</a>
+                <a href="/cakes" class="nav-link">Menu</a>
+                <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
+                    class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
+                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
+                <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
+                    class="nav-link">Login</a>
+                <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
+                    class="nav-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container" style="display: block;">
+        <div class="cake-detail">
+            <div class="detail-image">
+                <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/600x500/ff9a9e/white?text=Sweet+Delights'}"
+                    th:alt="${cake.name}">
+            </div>
+            <div class="detail-info">
+                <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
+                <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+                    <p class="detail-price" style="margin-bottom: 0;" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                    <span th:if="${cake.quantity > 0}" style="font-size: 1.1em; color: #28a745; font-weight: bold; padding: 5px 15px; background: #e8f5e9; border-radius: 20px;">In Stock: [[${cake.quantity}]]</span>
+                    <span th:if="${cake.quantity <= 0}" style="font-size: 1.1em; color: #dc3545; font-weight: bold; padding: 5px 15px; background: #ffebee; border-radius: 20px;">Out of Stock</span>
+                </div>
+
+                <div class="detail-description">
+                    <h3>Description</h3>
+                    <p th:text="${cake.description}">Detailed description of the cake goes here...</p>
+                </div>
+
+                <div class="detail-actions">
+                    <button th:if="${cake.model3D != null}"
+                            class="btn btn-info"
+                            style="margin-right: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;"
+                            onclick="open3DViewer()">
+                        View 3D Model
+                    </button>
+                    
+                    <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                        <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart">Add to Cart</a>
+                        <button th:if="${cake.quantity <= 0}" class="btn btn-primary" style="opacity: 0.5; cursor: not-allowed;" disabled>Out of Stock</button>
+                    </th:block>
+                    
+                    <a href="/cakes" class="btn btn-secondary">Back to Menu</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container" style="justify-content: center;">
+            <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 3D Viewer Modal -->
+    <div id="model3dModal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.8);">
+        <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 900px; height: 75vh; border-radius: 10px; position: relative;">
+            <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                <button th:if="${cake.quantity > 0}" onclick="saveAndBuy()" style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #4CAF50; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Save Design & Add to Cart</button>
+                <button th:if="${cake.quantity <= 0}" style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #888; color: white; cursor: not-allowed; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" disabled>Out of Stock</button>
+            </th:block>
+            <span onclick="close3DViewer()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; right: 20px; z-index: 1060;">&times;</span>
+            <h2 style="margin-top: 0">3D Model: <span th:text="${cake.name}"></span></h2>
+            <div id="model3dContainer" style="width: 100%; height: calc(100% - 40px); background: #eee; border-radius: 5px; overflow: hidden; position: relative;"></div>
+        </div>
+    </div>
+
+    <div th:insert="~{cake/threejs-scripts}"></div>
+
+    <script th:inline="javascript">
+        function open3DViewer() {
+            var modal = document.getElementById("model3dModal");
+            modal.style.display = "block";
+            
+            var modelName = /*[[${cake.model3D}]]*/ null;
+            if (modelName) {
+                // Assuming show3DModel is defined in threejs-scripts fragment
+                show3DModel("model3dContainer", "/model/" + modelName);
+            }
+        }
+        
+        function close3DViewer() {
+            var modal = document.getElementById("model3dModal");
+            modal.style.display = "none";
+            document.getElementById("model3dContainer").innerHTML = ""; 
+        }
+
+        function saveAndBuy() {
+            var cakeId = /*[[${cake.id}]]*/ -1;
+            // Get snapshot from the threejs scripts exported helper
+            var snapshotDataUrl = null;
+            if (typeof ModelViewerHelper !== 'undefined') {
+                snapshotDataUrl = ModelViewerHelper.getSnapshot();
+            }
+
+            if (!snapshotDataUrl) {
+                showToast('Lỗi khi lưu ảnh tuỳ biến', true);
+                return;
+            }
+
+            // POST to the custom endpoint
+            fetch('/cart/api/addCustom/' + cakeId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ customImage: snapshotDataUrl })
+            })
+            .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Something went wrong');
+            })
+            .then(data => {
+                // Update cart size
+                const cartSpans = document.querySelectorAll('a[href="/cart"] span');
+                cartSpans.forEach(span => span.textContent = data.cartSize);
+
+                close3DViewer();
+                showToast('Đã thêm sản phẩm tuỳ biến vào giỏ hàng thành công! 🍰');
+            })
+            .catch(error => {
+                showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+            });
+        }
+    </script>
+
+    <script>
+        document.querySelectorAll('.ajax-add-to-cart').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const url = this.getAttribute('href');
+
+                fetch(url, { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) return response.json();
+                        throw new Error('Something went wrong');
+                    })
+                    .then(data => {
+                        // Update cart size
+                        const cartSpans = document.querySelectorAll('a[href="/cart"] span');
+                        cartSpans.forEach(span => span.textContent = data.cartSize);
+
+                        // Show fancy toast notification
+                        showToast('Đã thêm sản phẩm vào giỏ hàng thành công! 🍰');
+                    })
+                    .catch(error => {
+                        showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+                    });
+            });
+        });
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '30px';
+            toast.style.right = '30px';
+            toast.style.backgroundColor = isError ? '#e74c3c' : '#4CAF50';
+            toast.style.color = 'white';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '5px';
+            toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '1000';
+            toast.style.fontSize = '16px';
+            toast.style.transition = 'all 0.3s ease';
+            toast.style.transform = 'translateY(100px)';
+            toast.style.opacity = '0';
+
+            document.body.appendChild(toast);
+
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+            }, 10);
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100px)';
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
