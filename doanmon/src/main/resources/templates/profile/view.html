@@ -12,29 +12,29 @@
                 padding: 20px !important;
                 margin: 0 15px !important;
             }
-            
+
             .profile-avatar {
                 width: 80px !important;
                 height: 80px !important;
                 font-size: 35px !important;
                 margin-bottom: 10px !important;
             }
-            
+
             .profile-header h2 {
                 font-size: 1.4rem !important;
             }
-            
+
             .profile-header p {
                 font-size: 0.85rem !important;
             }
-            
+
             .profile-table td {
                 display: block !important;
                 width: 100% !important;
                 padding: 10px 15px !important;
                 text-align: left !important;
             }
-            
+
             .profile-table tr {
                 display: block !important;
                 margin-bottom: 15px !important;
@@ -42,27 +42,27 @@
                 border-radius: 8px !important;
                 border: none !important;
             }
-            
+
             .profile-table td:first-child {
                 font-size: 0.85rem !important;
                 padding-bottom: 5px !important;
                 border-bottom: 1px solid #e0e0e0 !important;
             }
-            
+
             .profile-table td:last-child {
                 padding-top: 5px !important;
             }
         }
-        
+
         @media (max-width: 480px) {
             .section-title {
                 font-size: 1.5rem !important;
             }
-            
+
             .profile-container {
                 padding: 15px !important;
             }
-            
+
             .profile-avatar {
                 width: 70px !important;
                 height: 70px !important;
@@ -77,12 +77,20 @@
     <header class="header">
         <div class="container">
             <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav">
                 <a href="/cakes" class="nav-link">Home</a>
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart</a>
-                <a href="/profile" class="nav-link active" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
+                <a href="/profile" class="nav-link active" style="display: flex; align-items: center;">Profile / Orders
+                    <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}"
+                        style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;"
+                        title="New order updates"></span></a>
                 <a th:if="${authenticated}" href="/logout" class="nav-link">Logout</a>
                 <a th:unless="${authenticated}" href="/login" class="nav-link">Login</a>
             </nav>
@@ -94,7 +102,8 @@
 
         <!-- Not Logged In -->
         <div th:if="${!authenticated}" style="text-align: center; margin-top: 50px;">
-            <p style="font-size: 1.5rem; color: var(--light-text); margin-bottom: 20px;">Please login to view your profile.</p>
+            <p style="font-size: 1.5rem; color: var(--light-text); margin-bottom: 20px;">Please login to view your
+                profile.</p>
             <div style="display: flex; gap: 15px; justify-content: center;">
                 <a href="/login" class="btn btn-primary">Login</a>
                 <a href="/cakes" class="btn btn-secondary">Go to Home</a>
@@ -104,40 +113,54 @@
         <!-- Authenticated User Profile -->
         <div th:if="${authenticated}" class="profile-container"
             style="background: white; padding: 30px; border-radius: var(--radius); box-shadow: var(--shadow); max-width: 800px; margin: 0 auto;">
-            
+
             <!-- Profile Header with Avatar and Name -->
-            <div class="profile-header" style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px;">
-                <div class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: white; font-size: 45px; font-weight: 800; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"
+            <div class="profile-header"
+                style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; margin-bottom: 20px;">
+                <div class="profile-avatar"
+                    style="width: 100px; height: 100px; border-radius: 50%; background: var(--primary-color); display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: white; font-size: 45px; font-weight: 800; box-shadow: 0 5px 15px rgba(0,0,0,0.2);"
                     th:text="${fullName != null && fullName != '' ? fullName.substring(0,1).toUpperCase() : (username != null ? username.substring(0,1).toUpperCase() : 'U')}">
                     U
                 </div>
                 <h2 style="font-size: 1.75rem; color: var(--text-color); margin-bottom: 5px; font-weight: 700;"
                     th:text="${fullName != null && fullName != '' ? fullName : username}">User Name</h2>
-                <p style="color: var(--light-text); font-size: 0.95rem;" th:text="${email != null && email != '' ? email : 'No email provided'}">email@example.com</p>
+                <p style="color: var(--light-text); font-size: 0.95rem;"
+                    th:text="${email != null && email != '' ? email : 'No email provided'}">email@example.com</p>
             </div>
 
             <!-- Profile Information Table -->
             <table class="profile-table" style="width: 100%; border-collapse: collapse;">
                 <tbody>
                     <tr style="border-bottom: 1px solid #f9f9f9;">
-                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text); width: 220px;">Username</td>
-                        <td class="profile-table" style="padding: 15px; color: var(--text-color); font-weight: 600;" th:text="${username}">username</td>
+                        <td class="profile-table"
+                            style="padding: 15px; font-weight: 600; color: var(--light-text); width: 220px;">Username
+                        </td>
+                        <td class="profile-table" style="padding: 15px; color: var(--text-color); font-weight: 600;"
+                            th:text="${username}">username</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #f9f9f9;">
-                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">Email Address</td>
-                        <td class="profile-table" style="padding: 15px; color: var(--text-color);" th:text="${email != null && email != '' ? email : 'Not provided'}">email@example.com</td>
+                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">
+                            Email Address</td>
+                        <td class="profile-table" style="padding: 15px; color: var(--text-color);"
+                            th:text="${email != null && email != '' ? email : 'Not provided'}">email@example.com</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #f9f9f9;">
-                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">Full Name</td>
-                        <td class="profile-table" style="padding: 15px; color: var(--text-color);" th:text="${fullName != null && fullName != '' ? fullName : 'Not provided'}">Full Name</td>
+                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">
+                            Full Name</td>
+                        <td class="profile-table" style="padding: 15px; color: var(--text-color);"
+                            th:text="${fullName != null && fullName != '' ? fullName : 'Not provided'}">Full Name</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #f9f9f9;">
-                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">Authentication Provider</td>
-                        <td class="profile-table" style="padding: 15px; color: var(--text-color);" th:text="${provider}">LOCAL</td>
+                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">
+                            Authentication Provider</td>
+                        <td class="profile-table" style="padding: 15px; color: var(--text-color);"
+                            th:text="${provider}">LOCAL</td>
                     </tr>
                     <tr>
-                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">User Roles</td>
-                        <td class="profile-table" style="padding: 15px; color: var(--text-color);" th:text="${roles}">ROLE</td>
+                        <td class="profile-table" style="padding: 15px; font-weight: 600; color: var(--light-text);">
+                            User Roles</td>
+                        <td class="profile-table" style="padding: 15px; color: var(--text-color);" th:text="${roles}">
+                            ROLE</td>
                     </tr>
                 </tbody>
             </table>
@@ -160,13 +183,19 @@
                             </tr>
                         </thead>
                         <tbody th:each="order : ${orders}">
-                            <tr style="border-bottom: 1px solid #ddd; transition: background-color 0.3s; background-color: #f8f9fa;" onmouseover="this.style.backgroundColor='#f1f1f1'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+                            <tr style="border-bottom: 1px solid #ddd; transition: background-color 0.3s; background-color: #f8f9fa;"
+                                onmouseover="this.style.backgroundColor='#f1f1f1'"
+                                onmouseout="this.style.backgroundColor='#f8f9fa'">
                                 <td style="padding: 12px; font-weight: bold;" th:text="${'#' + order.id}"></td>
-                                <td style="padding: 12px;" th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
-                                <td style="padding: 12px;" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                <td style="padding: 12px;"
+                                    th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td style="padding: 12px;"
+                                    th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
+                                </td>
                                 <td style="padding: 12px; font-weight: 500;" th:text="${order.method}"></td>
                                 <td style="padding: 12px;">
-                                    <span style="padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.85em; display: inline-block; text-align: center;"
+                                    <span
+                                        style="padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.85em; display: inline-block; text-align: center;"
                                         th:style="${
                                             order.status == 'PENDING_CONFIRMATION' ? 'background:#ffc107;color:#000;padding:5px 10px;border-radius:5px;' :
                                             (order.status == 'WAITING_FOR_PICKUP' ? 'background:#17a2b8;color:#fff;padding:5px 10px;border-radius:5px;' :
@@ -188,19 +217,30 @@
                             </tr>
                             <tr>
                                 <td colspan="5" style="padding: 10px 12px 20px 12px; border-bottom: 2px solid #dee2e6;">
-                                    <strong style="display: block; margin-bottom: 10px; font-size: 0.9em; color: var(--light-text);">Order Items:</strong>
+                                    <strong
+                                        style="display: block; margin-bottom: 10px; font-size: 0.9em; color: var(--light-text);">Order
+                                        Items:</strong>
                                     <div style="display: flex; flex-direction: column; gap: 10px;">
-                                        <div th:each="item : ${order.items}" style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px;">
-                                            <img th:if="${item.customImage != null}" th:src="${item.customImage}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 5px; border: 2px solid #ff69b4;">
-                                            <img th:unless="${item.customImage != null}" th:src="${item.cake.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                                        <div th:each="item : ${order.items}"
+                                            style="display: flex; align-items: center; gap: 15px; background: #fff; padding: 10px; border: 1px solid #e9ecef; border-radius: 5px;">
+                                            <img th:if="${item.customImage != null}" th:src="${item.customImage}"
+                                                style="width: 70px; height: 70px; object-fit: cover; border-radius: 5px; border: 2px solid #ff69b4;">
+                                            <img th:unless="${item.customImage != null}" th:src="${item.cake.image}"
+                                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
                                             <div style="flex: 1;">
                                                 <div style="font-weight: bold;" th:text="${item.cake.name}">Cake</div>
-                                                <div th:if="${item.customImage != null}" style="color: #ff69b4; font-size: 0.8em; font-weight: bold;">[Custom Design Included]</div>
+                                                <div th:if="${item.customImage != null}"
+                                                    style="color: #ff69b4; font-size: 0.8em; font-weight: bold;">[Custom
+                                                    Design Included]</div>
                                                 <div style="font-size: 0.85em; color: #666;">
-                                                    <span th:text="${item.quantity} + ' x ' + ${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">1 x 0</span>
+                                                    <span
+                                                        th:text="${item.quantity} + ' x ' + ${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">1
+                                                        x 0</span>
                                                 </div>
                                             </div>
-                                            <div style="font-weight: bold; font-size: 0.9em; text-align: right;" th:text="${#numbers.formatDecimal(item.getTotal(), 0, 'COMMA', 0, 'POINT')} + ' VND'">0</div>
+                                            <div style="font-weight: bold; font-size: 0.9em; text-align: right;"
+                                                th:text="${#numbers.formatDecimal(item.getTotal(), 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                                0</div>
                                         </div>
                                     </div>
                                 </td>
@@ -217,6 +257,8 @@
             <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
         </div>
     </footer>
+
+    <script src="/js/mobile-menu.js"></script>
 
 </body>
 

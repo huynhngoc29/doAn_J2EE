@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <meta charset="UTF-8">
     <title>Register - Sweet Delights</title>
     <link rel="stylesheet" href="/css/style.css">
@@ -39,6 +41,11 @@
     <header class="header">
         <div class="container">
             <h1 class="logo">🍰 Sweet Delights</h1>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav">
                 <a href="/cakes" class="nav-link">Home</a>
             </nav>
@@ -73,6 +80,7 @@
             Already have an account? <a href="/login">Login here</a>
         </p>
     </div>
+    <script src="/js/mobile-menu.js"></script>
 </body>
 
 </html>

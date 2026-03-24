@@ -13,13 +13,21 @@
     <header class="header">
         <div class="container">
             <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav">
                 <a href="/cakes" class="nav-link">Home</a>
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
-                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
+                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span
+                        th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}"
+                        style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;"
+                        title="New order updates"></span></a>
                 <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
                     class="nav-link">Login</a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
@@ -35,12 +43,19 @@
                     th:alt="${cake.name}">
             </div>
             <div class="detail-info">
-                <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
+                <span class="cake-category" style="align-self: flex-start;"
+                    th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
                 <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
-                    <p class="detail-price" style="margin-bottom: 0;" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
-                    <span th:if="${cake.quantity > 0}" style="font-size: 1.1em; color: #28a745; font-weight: bold; padding: 5px 15px; background: #e8f5e9; border-radius: 20px;">In Stock: [[${cake.quantity}]]</span>
-                    <span th:if="${cake.quantity <= 0}" style="font-size: 1.1em; color: #dc3545; font-weight: bold; padding: 5px 15px; background: #ffebee; border-radius: 20px;">Out of Stock</span>
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 20px;">
+                    <p class="detail-price" style="margin-bottom: 0;"
+                        th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                    <span th:if="${cake.quantity > 0}"
+                        style="font-size: 1.1em; color: #28a745; font-weight: bold; padding: 5px 15px; background: #e8f5e9; border-radius: 20px;">In
+                        Stock: [[${cake.quantity}]]</span>
+                    <span th:if="${cake.quantity <= 0}"
+                        style="font-size: 1.1em; color: #dc3545; font-weight: bold; padding: 5px 15px; background: #ffebee; border-radius: 20px;">Out
+                        of Stock</span>
                 </div>
 
                 <div class="detail-description">
@@ -49,18 +64,19 @@
                 </div>
 
                 <div class="detail-actions">
-                    <button th:if="${cake.model3D != null}"
-                            class="btn btn-info"
-                            style="margin-right: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;"
-                            onclick="open3DViewer()">
+                    <button th:if="${cake.model3D != null}" class="btn btn-info"
+                        style="margin-right: 10px; background-color: #17a2b8; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;"
+                        onclick="open3DViewer()">
                         View 3D Model
                     </button>
-                    
+
                     <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
-                        <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart">Add to Cart</a>
-                        <button th:if="${cake.quantity <= 0}" class="btn btn-primary" style="opacity: 0.5; cursor: not-allowed;" disabled>Out of Stock</button>
+                        <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}"
+                            class="btn btn-primary ajax-add-to-cart">Add to Cart</a>
+                        <button th:if="${cake.quantity <= 0}" class="btn btn-primary"
+                            style="opacity: 0.5; cursor: not-allowed;" disabled>Out of Stock</button>
                     </th:block>
-                    
+
                     <a href="/cakes" class="btn btn-secondary">Back to Menu</a>
                 </div>
             </div>
@@ -74,15 +90,24 @@
     </footer>
 
     <!-- 3D Viewer Modal -->
-    <div id="model3dModal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.8);">
-        <div style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 900px; height: 75vh; border-radius: 10px; position: relative;">
+    <div id="model3dModal"
+        style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background-color: rgba(0,0,0,0.8);">
+        <div
+            style="background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 900px; height: 75vh; border-radius: 10px; position: relative;">
             <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
-                <button th:if="${cake.quantity > 0}" onclick="saveAndBuy()" style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #4CAF50; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Save Design & Add to Cart</button>
-                <button th:if="${cake.quantity <= 0}" style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #888; color: white; cursor: not-allowed; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);" disabled>Out of Stock</button>
+                <button th:if="${cake.quantity > 0}" onclick="saveAndBuy()"
+                    style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #4CAF50; color: white; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Save
+                    Design & Add to Cart</button>
+                <button th:if="${cake.quantity <= 0}"
+                    style="position: absolute; top: 15px; right: 60px; z-index: 1060; padding: 6px 12px; border-radius: 4px; border: none; background: #888; color: white; cursor: not-allowed; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"
+                    disabled>Out of Stock</button>
             </th:block>
-            <span onclick="close3DViewer()" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; right: 20px; z-index: 1060;">&times;</span>
+            <span onclick="close3DViewer()"
+                style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; position: absolute; top: 10px; right: 20px; z-index: 1060;">&times;</span>
             <h2 style="margin-top: 0">3D Model: <span th:text="${cake.name}"></span></h2>
-            <div id="model3dContainer" style="width: 100%; height: calc(100% - 40px); background: #eee; border-radius: 5px; overflow: hidden; position: relative;"></div>
+            <div id="model3dContainer"
+                style="width: 100%; height: calc(100% - 40px); background: #eee; border-radius: 5px; overflow: hidden; position: relative;">
+            </div>
         </div>
     </div>
 
@@ -92,18 +117,18 @@
         function open3DViewer() {
             var modal = document.getElementById("model3dModal");
             modal.style.display = "block";
-            
+
             var modelName = /*[[${cake.model3D}]]*/ null;
             if (modelName) {
                 // Assuming show3DModel is defined in threejs-scripts fragment
                 show3DModel("model3dContainer", "/model/" + modelName);
             }
         }
-        
+
         function close3DViewer() {
             var modal = document.getElementById("model3dModal");
             modal.style.display = "none";
-            document.getElementById("model3dContainer").innerHTML = ""; 
+            document.getElementById("model3dContainer").innerHTML = "";
         }
 
         function saveAndBuy() {
@@ -127,21 +152,21 @@
                 },
                 body: JSON.stringify({ customImage: snapshotDataUrl })
             })
-            .then(response => {
-                if (response.ok) return response.json();
-                throw new Error('Something went wrong');
-            })
-            .then(data => {
-                // Update cart size
-                const cartSpans = document.querySelectorAll('a[href="/cart"] span');
-                cartSpans.forEach(span => span.textContent = data.cartSize);
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Something went wrong');
+                })
+                .then(data => {
+                    // Update cart size
+                    const cartSpans = document.querySelectorAll('a[href="/cart"] span');
+                    cartSpans.forEach(span => span.textContent = data.cartSize);
 
-                close3DViewer();
-                showToast('Đã thêm sản phẩm tuỳ biến vào giỏ hàng thành công! 🍰');
-            })
-            .catch(error => {
-                showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
-            });
+                    close3DViewer();
+                    showToast('Đã thêm sản phẩm tuỳ biến vào giỏ hàng thành công! 🍰');
+                })
+                .catch(error => {
+                    showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+                });
         }
     </script>
 
@@ -202,6 +227,7 @@
             }, 3000);
         }
     </script>
+    <script src="/js/mobile-menu.js"></script>
 </body>
 
 </html>
