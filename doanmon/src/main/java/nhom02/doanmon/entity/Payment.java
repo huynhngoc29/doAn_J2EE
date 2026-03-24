@@ -42,6 +42,12 @@ public class Payment {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "user_read", nullable = false, columnDefinition = "boolean default true")
+    private boolean userRead = true;
+
+    @Column(name = "admin_read", nullable = false, columnDefinition = "boolean default false")
+    private boolean adminRead = false;
+
     public void addItem(PaymentItem item) {
         item.setPayment(this);
         items.add(item);
@@ -110,5 +116,21 @@ public class Payment {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public boolean isUserRead() {
+        return userRead;
+    }
+
+    public void setUserRead(boolean userRead) {
+        this.userRead = userRead;
+    }
+
+    public boolean isAdminRead() {
+        return adminRead;
+    }
+
+    public void setAdminRead(boolean adminRead) {
+        this.adminRead = adminRead;
     }
 }

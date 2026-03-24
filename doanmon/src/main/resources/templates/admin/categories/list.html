@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
-    <title>Manage Cakes - Admin</title>
+    <title>Manage Categories - Admin</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
 
@@ -11,6 +11,7 @@
       <div class="container">
         <h1 class="logo">🍰 Admin Dashboard</h1>
         <nav class="nav">
+          <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
           <a href="/admin/users" class="nav-link">Manage Users</a>
           <a href="/admin/categories" class="nav-link">Manage Categories</a>
           <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>
@@ -28,10 +29,10 @@
     </header>
 
     <main class="main-content container">
-      <h2 class="section-title">Manage Cakes</h2>
+      <h2 class="section-title">Manage Categories</h2>
 
       <div class="admin-toolbar">
-        <a href="/admin/cakes/add" class="btn btn-primary">Add New Cake</a>
+        <a href="/admin/categories/add" class="btn btn-primary">Add New Category</a>
       </div>
 
       <div class="admin-table-wrapper">
@@ -39,35 +40,25 @@
           <thead>
             <tr>
               <th>ID</th>
-              <th>Image</th>
               <th>Name</th>
-              <th>Category</th>
-              <th>Price</th>
+              <th>Description</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr th:each="cake : ${cakes}">
-              <td th:text="${cake.id}">1</td>
-              <td>
-                <img
-                  th:src="${cake.image}"
-                  class="admin-thumbnail"
-                  alt="Cake image"
-                />
-              </td>
-              <td th:text="${cake.name}">Cake Name</td>
-              <td th:text="${cake.category != null ? cake.category.name : ''}">Category</td>
-              <td th:text="${'$' + cake.price}">$10.00</td>
+            <tr th:each="cat : ${categories}">
+              <td th:text="${cat.id}">1</td>
+              <td th:text="${cat.name}">Category Name</td>
+              <td th:text="${cat.description}">Description</td>
               <td>
                 <div class="admin-actions">
                   <a
-                    th:href="@{/admin/cakes/edit/{id}(id=${cake.id})}"
+                    th:href="@{/admin/categories/edit/{id}(id=${cat.id})}"
                     class="btn btn-secondary"
                     >Edit</a
                   >
                   <a
-                    th:href="@{/admin/cakes/delete/{id}(id=${cake.id})}"
+                    th:href="@{/admin/categories/delete/{id}(id=${cat.id})}"
                     class="btn btn-danger"
                     onclick="return confirm('Are you sure?');"
                     >Delete</a

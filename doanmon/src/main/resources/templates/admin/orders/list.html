@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Orders - Admin</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <style>
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            display: inline-block;
+            text-align: center;
+        }
+        .status-PENDING_CONFIRMATION { background-color: #ffc107; color: #000; }
+        .status-WAITING_FOR_PICKUP { background-color: #17a2b8; color: #fff; }
+        .status-SHIPPING { background-color: #007bff; color: #fff; }
+        .status-DELIVERED { background-color: #28a745; color: #fff; }
+        .status-FAILED, .status-CANCELLED { background-color: #dc3545; color: #fff; }
+        
+        .update-form {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .red-dot {
+            height: 10px;
+            width: 10px;
+            background-color: red;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">🍰 Admin Dashboard</h1>
+            <nav class="nav">
+                <a href="/admin/cakes" class="nav-link">Cakes</a>
+                <a href="/admin/users" class="nav-link">Users</a>
+                <a href="/admin/categories" class="nav-link">Categories</a>
+                <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">
+                    Orders 
+                    <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" class="red-dot" th:title="${pendingOrderCount + ' pending orders'}"></span>
+                </a>
+                <a href="/admin/revenue" class="nav-link">Revenue</a>
+                <a href="/cakes" class="nav-link">Main Site</a>
+                <a href="/logout" class="nav-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content container">
+        <h2 class="section-title">Manage Orders</h2>
+
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>User / Username</th>
+                        <th>Date Time</th>
+                        <th>Amount (VND)</th>
+                        <th>Method</th>
+                        <th>Current Status</th>
+                        <th>Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.id}">1</td>
+                        <td th:text="${order.user != null ? order.user.username : 'Guest'}">User</td>
+                        <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">Date</td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')}">100,000</td>
+                        <td th:text="${order.method}">COD</td>
+                        <td>
+                            <span th:class="'status-badge status-' + ${order.status}" th:text="${order.status}">STATUS</span>
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/orders/update-status}" method="post" class="update-form">
+                                <input type="hidden" name="orderId" th:value="${order.id}" />
+                                <select name="status" class="form-control" style="width: auto; padding: 5px;">
+                                    <option value="PENDING_CONFIRMATION" th:selected="${order.status == 'PENDING_CONFIRMATION'}">Pending Confirmation</option>
+                                    <option value="WAITING_FOR_PICKUP" th:selected="${order.status == 'WAITING_FOR_PICKUP'}">Waiting for Pickup</option>
+                                    <option value="SHIPPING" th:selected="${order.status == 'SHIPPING'}">Shipping</option>
+                                    <option value="DELIVERED" th:selected="${order.status == 'DELIVERED'}">Delivered</option>
+                                    <option value="CANCELLED" th:selected="${order.status == 'CANCELLED'}">Cancelled</option>
+                                    <option value="FAILED" th:selected="${order.status == 'FAILED'}">Failed</option>
+                                </select>
+                                <button type="submit" class="btn btn-secondary" style="padding: 5px 10px;">Save</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

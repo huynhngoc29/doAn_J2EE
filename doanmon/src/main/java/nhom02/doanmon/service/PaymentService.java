@@ -38,7 +38,11 @@ public class PaymentService {
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setMethod(method);
-        payment.setStatus("PENDING");
+        if ("BANK".equals(method)) {
+            payment.setStatus("WAITING_PAYMENT");
+        } else {
+            payment.setStatus("PENDING_CONFIRMATION");
+        }
         payment.setAddress(address);
         // convert totals to VND
         double totalVnd = Math.round(cart.getTotalAmount() * 23000);

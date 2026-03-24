@@ -82,7 +82,7 @@
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart</a>
-                <a href="/profile" class="nav-link active">Profile</a>
+                <a href="/profile" class="nav-link active" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
                 <a th:if="${authenticated}" href="/logout" class="nav-link">Logout</a>
                 <a th:unless="${authenticated}" href="/login" class="nav-link">Login</a>
             </nav>
@@ -141,6 +141,55 @@
                     </tr>
                 </tbody>
             </table>
+
+            <!-- Orders Section -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #f0f0f0;">
+                <h3 style="margin-bottom: 20px; font-size: 1.5rem; color: var(--text-color);">My Orders</h3>
+                <div th:if="${orders == null || orders.isEmpty()}">
+                    <p style="color: var(--light-text);">You haven't placed any orders yet.</p>
+                </div>
+                <div th:if="${orders != null && !orders.isEmpty()}" style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="background-color: var(--primary-color); color: white;">
+                                <th style="padding: 12px; border-radius: 5px 0 0 0;">ID</th>
+                                <th style="padding: 12px;">Date</th>
+                                <th style="padding: 12px;">Amount</th>
+                                <th style="padding: 12px;">Method</th>
+                                <th style="padding: 12px; border-radius: 0 5px 0 0;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="order : ${orders}" style="border-bottom: 1px solid #ddd; transition: background-color 0.3s;" onmouseover="this.style.backgroundColor='#f9f9f9'" onmouseout="this.style.backgroundColor='transparent'">
+                                <td style="padding: 12px; font-weight: bold;" th:text="${'#' + order.id}"></td>
+                                <td style="padding: 12px;" th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                                <td style="padding: 12px;" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                <td style="padding: 12px; font-weight: 500;" th:text="${order.method}"></td>
+                                <td style="padding: 12px;">
+                                    <span style="padding: 5px 10px; border-radius: 5px; font-weight: bold; font-size: 0.85em; display: inline-block; text-align: center;"
+                                        th:style="${
+                                            order.status == 'PENDING_CONFIRMATION' ? 'background:#ffc107;color:#000;padding:5px 10px;border-radius:5px;' :
+                                            (order.status == 'WAITING_FOR_PICKUP' ? 'background:#17a2b8;color:#fff;padding:5px 10px;border-radius:5px;' :
+                                            (order.status == 'SHIPPING' ? 'background:#007bff;color:#fff;padding:5px 10px;border-radius:5px;' :
+                                            (order.status == 'DELIVERED' ? 'background:#28a745;color:#fff;padding:5px 10px;border-radius:5px;' :
+                                            (order.status == 'FAILED' || order.status == 'CANCELLED' ? 'background:#dc3545;color:#fff;padding:5px 10px;border-radius:5px;' : 'background:#eee;color:#333;padding:5px 10px;border-radius:5px;'))))
+                                        }">
+                                        <span th:text="${
+                                            order.status == 'PENDING_CONFIRMATION' ? 'Pending Confirmation' :
+                                            (order.status == 'WAITING_FOR_PICKUP' ? 'Waiting for Pickup' :
+                                            (order.status == 'SHIPPING' ? 'Shipping' :
+                                            (order.status == 'DELIVERED' ? 'Delivered' :
+                                            (order.status == 'CANCELLED' ? 'Cancelled' :
+                                            (order.status == 'WAITING_PAYMENT' ? 'Waiting Payment' :
+                                            (order.status == 'FAILED' ? 'Failed' : order.status))))))}">
+                                        </span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </main>
 

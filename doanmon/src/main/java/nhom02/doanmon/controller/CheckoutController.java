@@ -46,7 +46,13 @@ public class CheckoutController {
         User user = null;
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getName())) {
-            user = userRepository.findByUsername(authentication.getName()).orElse(null);
+            if (authentication.getPrincipal() instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+                org.springframework.security.oauth2.core.user.OAuth2User oauth2User = (org.springframework.security.oauth2.core.user.OAuth2User) authentication.getPrincipal();
+                String email = oauth2User.getAttribute("email");
+                user = userRepository.findByUsername(email).orElse(null);
+            } else {
+                user = userRepository.findByUsername(authentication.getName()).orElse(null);
+            }
         }
         Payment payment;
         try {
@@ -85,7 +91,7 @@ public class CheckoutController {
                 payment = paymentService.getPaymentById(id);
                 if (payment != null) {
                     if ("00".equals(responseCode)) {
-                        payment.setStatus("PAID");
+                        payment.setStatus("WAITING_FOR_PICKUP");
                     } else {
                         payment.setStatus("FAILED");
                     }
