@@ -12,6 +12,11 @@
     <header class="header">
         <div class="container">
             <a href="/cakes" class="logo">🍰 Sweet Delights</a>
+            <button class="menu-toggle" id="mobile-menu-btn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
             <nav class="nav">
                 <a href="/cakes" class="nav-link">Home</a>
                 <a href="/cakes" class="nav-link">Menu</a>
@@ -23,8 +28,10 @@
     <main class="main-content container" style="text-align: center; padding: 60px 0;">
         <h2 class="section-title">Payment Result</h2>
         <p th:if="${payment != null}">
-            <span th:if="${payment.status == 'PAID'}" style="color: #27ae60; font-weight: 700;">Your payment was successful!</span>
-            <span th:if="${payment.status != 'PAID'}" style="color: #e74c3c; font-weight: 700;">Payment failed or was cancelled.</span>
+            <span th:if="${payment.status == 'WAITING_FOR_PICKUP' or payment.status == 'PAID'}"
+                style="color: #27ae60; font-weight: 700;">Your payment was successful!</span>
+            <span th:if="${payment.status != 'WAITING_FOR_PICKUP' and payment.status != 'PAID'}"
+                style="color: #e74c3c; font-weight: 700;">Payment failed or was cancelled.</span>
         </p>
         <p th:if="${payment == null}">No order information available.</p>
         <a href="/cakes" class="btn btn-primary" style="margin-top: 20px;">Back to Home</a>
@@ -35,6 +42,7 @@
             <p>&copy; 2026 Sweet Delights Cake Shop. All rights reserved.</p>
         </div>
     </footer>
+    <script src="/js/mobile-menu.js"></script>
 </body>
 
 </html>
