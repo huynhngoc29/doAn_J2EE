@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Edit Cake - Admin</title>
+    <title>Edit Category - Admin</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .form-container {
@@ -41,8 +41,8 @@
             <h1 class="logo">Admin Dashboard</h1>
             <nav class="nav">
                 <a href="/admin/cakes" class="nav-link">Manage Cakes</a>
-                <a href="/admin/users" class="nav-link">Manage Users</a>
                 <a href="/admin/categories" class="nav-link">Manage Categories</a>
+                <a href="/admin/users" class="nav-link">Manage Users</a>
                 <a href="/admin/orders" class="nav-link" style="display: flex; align-items: center;">Orders <span th:if="${pendingOrderCount != null && pendingOrderCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" th:title="${pendingOrderCount + ' pending orders'}"></span></a>
                 <a href="/admin/revenue" class="nav-link">Revenue</a>
             </nav>
@@ -51,9 +51,9 @@
 
     <main class="main-content container">
         <div class="form-container">
-            <h2 class="section-title" th:text="${cake.id == null ? 'Add New Cake' : 'Edit Cake'}">Edit Cake</h2>
+            <h2 class="section-title" th:text="${category.id == null ? 'Add New Category' : 'Edit Category'}">Edit Category</h2>
 
-            <form th:action="@{/admin/cakes/save}" th:object="${cake}" method="post" enctype="multipart/form-data">
+            <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
                 <input type="hidden" th:field="*{id}">
 
                 <div class="form-group">
@@ -62,40 +62,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Price</label>
-                    <input type="number" step="0.01" th:field="*{price}" class="form-control" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Category</label>
-                    <select th:field="*{category}" class="form-control" required>
-                        <option value="" disabled selected>Select a category</option>
-                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Image (Upload)</label>
-                    <input type="file" name="imageFile" accept="image/*" class="form-control">
-                    <div th:if="${cake.image != null}" style="margin-top: 5px; font-size: 0.9em; color: #666;">
-                        Current image: <img th:src="${cake.image}" style="max-height: 50px; vertical-align: middle; margin-left: 10px; border-radius: 5px;" alt="Current Image">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>3D Model (.glb, .gltf, etc.)</label>
-                    <input type="file" name="model3File" accept=".glb,.gltf" class="form-control">
-                    <div th:if="${cake.model3D != null}" style="margin-top: 5px; font-size: 0.9em; color: #666;">
-                        Current model: <span th:text="${cake.model3D}"></span>
-                    </div>
-                </div>
-
-                <div class="form-group">
                     <label>Description</label>
                     <textarea th:field="*{description}" class="form-control" rows="4"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Save Cake</button>
+                <button type="submit" class="btn btn-primary">Save Category</button>
             </form>
         </div>
     </main>

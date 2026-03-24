@@ -14,6 +14,9 @@ public class AdminController {
     @Autowired
     private CakeService cakeService;
 
+    @Autowired
+    private nhom02.doanmon.service.CategoryService categoryService;
+
     @GetMapping
     public String listCakes(Model model) {
         model.addAttribute("cakes", cakeService.findAll());
@@ -23,6 +26,7 @@ public class AdminController {
     @GetMapping("/add")
     public String addCakeForm(Model model) {
         model.addAttribute("cake", new Cake());
+        model.addAttribute("categories", categoryService.findAll());
         return "admin/cakes/form";
     }
 
@@ -98,6 +102,7 @@ public class AdminController {
     @GetMapping("/edit/{id}")
     public String editCakeForm(@PathVariable Long id, Model model) {
         model.addAttribute("cake", cakeService.findById(id).orElse(null));
+        model.addAttribute("categories", categoryService.findAll());
         return "admin/cakes/form";
     }
 

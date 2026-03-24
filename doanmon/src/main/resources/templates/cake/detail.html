@@ -19,7 +19,7 @@
                 <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}" href="/cart"
                     class="nav-link">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
-                    class="nav-link">Profile</a>
+                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
                 <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
                     class="nav-link">Login</a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
@@ -35,7 +35,7 @@
                     th:alt="${cake.name}">
             </div>
             <div class="detail-info">
-                <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category}">Category</span>
+                <span class="cake-category" style="align-self: flex-start;" th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
                 <h1 class="detail-title" th:text="${cake.name}">Cake Name</h1>
                 <p class="detail-price" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
 

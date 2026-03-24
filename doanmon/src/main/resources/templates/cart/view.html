@@ -18,7 +18,7 @@
                 <a href="/cakes" class="nav-link">Menu</a>
                 <a href="/cart" class="nav-link active">Cart <span th:text="${cartSize > 0 ? cartSize : 0}">0</span></a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/profile"
-                    class="nav-link">Profile</a>
+                    class="nav-link" style="display: flex; align-items: center;">Profile / Orders <span th:if="${unreadUpdateCount != null && unreadUpdateCount > 0}" style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block; margin-left: 5px;" title="New order updates"></span></a>
                 <a th:if="${#authentication == null || #authentication.name == 'anonymousUser'}" href="/login"
                     class="nav-link">Login</a>
                 <a th:if="${#authentication != null && #authentication.name != 'anonymousUser'}" href="/logout"
