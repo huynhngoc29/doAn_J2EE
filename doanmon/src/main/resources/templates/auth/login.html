@@ -3,105 +3,99 @@
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <meta charset="UTF-8" />
-  <title>Login - Sweet Delights</title>
+  <title>Login - Sweet Delights 🍰</title>
   <link rel="stylesheet" href="/css/style.css" />
-  <style>
-    .auth-container {
-      max-width: 400px;
-      margin: 50px auto;
-      padding: 30px;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
-
-    .btn-block {
-      width: 100%;
-      display: block;
-      text-align: center;
-    }
-
-    .google-btn {
-      background-color: #dd4b39;
-      color: white;
-      margin-top: 10px;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/auth.css" />
 </head>
 
-<body>
-  <header class="header">
-    <div class="container">
-      <h1 class="logo">🍰 Sweet Delights</h1>
-      <button class="menu-toggle" id="mobile-menu-btn">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <nav class="nav">
-        <a href="/cakes" class="nav-link">Home</a>
-      </nav>
-    </div>
-  </header>
+<body class="auth-page">
+  <!-- Back to Home Button -->
+  <div class="back-home">
+    <a href="/cakes">
+      <span>🏠 Back to Home</span>
+    </a>
+  </div>
 
   <div class="auth-container">
-    <h2 style="text-align: center; margin-bottom: 20px">Login</h2>
-
-    <div th:if="${param.error}" style="color: red; text-align: center; margin-bottom: 10px">
-      Invalid username or password.
-    </div>
-    <div th:if="${param.disabled}" style="color: red; text-align: center; margin-bottom: 10px">
-      Tài khoản đã bị khóa, vui lòng liên hệ admin.
-    </div>
-    <div th:if="${param.logout}" style="color: green; text-align: center; margin-bottom: 10px">
-      You have been logged out.
-    </div>
-    <div th:if="${param.success}" style="color: green; text-align: center; margin-bottom: 10px">
-      Registration successful! Please login.
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="auth-logo">🍰</div>
+      <h1 class="auth-title">Welcome Back!</h1>
+      <p class="auth-subtitle">Login to continue your sweet journey</p>
     </div>
 
+    <!-- Alert Messages -->
+    <div th:if="${param.error}" class="alert alert-error">
+      ❌ Invalid username or password
+    </div>
+    <div th:if="${param.disabled}" class="alert alert-error">
+      🔒 Account has been locked. Please contact admin.
+    </div>
+    <div th:if="${param.logout}" class="alert alert-success">
+      ✅ You have been logged out successfully
+    </div>
+    <div th:if="${param.success}" class="alert alert-success">
+      🎉 Registration successful! Please login.
+    </div>
+
+    <!-- Login Form -->
     <form th:action="@{/login}" method="post">
       <div class="form-group">
-        <label>Username</label>
-        <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+        <label for="username">👤 Username</label>
+        <input type="text" id="username" name="username" class="form-control" placeholder="Enter your username" required
+          autofocus />
       </div>
+
       <div class="form-group">
-        <label>Password</label>
-        <input type="password" name="password" class="form-control" placeholder="Enter password" required />
+        <label for="password">🔐 Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password"
+          required />
+        <span class="password-toggle" onclick="togglePassword()">👁️</span>
       </div>
-      <button type="submit" class="btn btn-primary btn-block">Login</button>
+
+      <button type="submit" class="btn btn-primary btn-block">
+        🚀 Login Now
+      </button>
     </form>
 
-    <div style="text-align: center; margin-top: 15px">
-      <span>Or</span>
+    <!-- Divider -->
+    <div class="auth-divider">
+      <span>OR</span>
     </div>
 
-    <a href="/oauth2/authorization/google" class="btn google-btn btn-block" style="
-          padding: 9px;
-          text-decoration: none;
-          box-sizing: border-box;
-          border: none;
-        ">Login with Google</a>
+    <!-- Google Login -->
+    <a href="/oauth2/authorization/google" class="btn google-btn btn-block">
+      Login with Google
+    </a>
 
-    <p style="text-align: center; margin-top: 20px">
-      Don't have an account? <a href="/register">Register here</a>
-    </p>
+    <!-- Footer -->
+    <div class="auth-footer">
+      <p>Don't have an account? <a href="/register">Register here</a></p>
+    </div>
   </div>
-  <script src="/js/mobile-menu.js"></script>
+
+  <script>
+    function togglePassword() {
+      const passwordInput = document.getElementById('password');
+      const toggle = document.querySelector('.password-toggle');
+
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggle.textContent = '🙈';
+      } else {
+        passwordInput.type = 'password';
+        toggle.textContent = '👁️';
+      }
+    }
+
+    // Add enter key animation
+    document.querySelector('form').addEventListener('submit', function (e) {
+      const btn = this.querySelector('.btn-primary');
+      btn.innerHTML = '<span class="loading-spinner"></span> Logging in...';
+      btn.disabled = true;
+    });
+  </script>
 </body>
 
 </html>

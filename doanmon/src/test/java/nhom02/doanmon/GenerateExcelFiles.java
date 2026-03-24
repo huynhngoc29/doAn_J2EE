@@ -42,22 +42,28 @@ public class GenerateExcelFiles {
         Row headerRow = sheet.createRow(0);
         createHeaderRow(headerRow);
 
-        // Data
+        // Data - Updated with new categories
         Object[][] data = {
-                { "CAKE-CHOCO-001", "Chocolate Fudge Cake", 28.99, "Chocolate", 50,
-                        "Rich dark chocolate cake with fudge frosting" },
-                { "CAKE-CHOCO-002", "Chocolate Truffle Delight", 32.50, "Chocolate", 30,
-                        "Premium chocolate truffle cake" },
-                { "CAKE-CHOCO-003", "Double Chocolate Dream", 26.75, "Chocolate", 40, "Double layer chocolate sponge" },
-                { "CAKE-VANILLA-001", "Classic Vanilla Sponge", 18.99, "Vanilla", 60, "Light and fluffy vanilla cake" },
-                { "CAKE-VANILLA-002", "Vanilla Bean Supreme", 22.50, "Vanilla", 35, "Made with real vanilla beans" },
-                { "CAKE-FRUIT-001", "Strawberry Shortcake", 24.99, "Fruit", 45, "Fresh strawberries with cream" },
-                { "CAKE-FRUIT-002", "Blueberry Bliss", 23.50, "Fruit", 40, "Loaded with fresh blueberries" },
-                { "CAKE-FRUIT-003", "Mixed Berry Delight", 25.99, "Fruit", 30,
-                        "Strawberry raspberry and blueberry mix" },
-                { "CAKE-SPECIAL-001", "Red Velvet Classic", 29.99, "Chocolate", 25,
-                        "Traditional red velvet with cream cheese" },
-                { "CAKE-SPECIAL-002", "Carrot Cake Supreme", 27.50, "Vanilla", 20, "Moist carrot cake with walnuts" }
+                { "CAKE-BDAY-001", "Rainbow Birthday Cake", 35.99, "Birthday Cakes", 50,
+                        "Colorful rainbow layers perfect for birthdays" },
+                { "CAKE-BDAY-002", "Unicorn Dream Cake", 42.50, "Birthday Cakes", 30,
+                        "Magical unicorn themed birthday cake" },
+                { "CAKE-BDAY-003", "Chocolate Birthday Delight", 38.75, "Birthday Cakes", 40,
+                        "Rich chocolate birthday cake with sprinkles" },
+                { "CAKE-WEDDING-001", "Classic White Wedding Cake", 150.00, "Wedding Cakes", 15,
+                        "Elegant 3-tier white wedding cake" },
+                { "CAKE-WEDDING-002", "Rose Garden Wedding Cake", 180.00, "Wedding Cakes", 10,
+                        "Beautiful rose decorated wedding cake" },
+                { "CAKE-CHEESE-001", "New York Cheesecake", 28.99, "Cheese Cakes", 45,
+                        "Classic creamy New York style cheesecake" },
+                { "CAKE-CHEESE-002", "Blueberry Cheesecake", 32.50, "Cheese Cakes", 40,
+                        "Cheesecake with fresh blueberry topping" },
+                { "CAKE-CHEESE-003", "Strawberry Cheesecake", 32.50, "Cheese Cakes", 35,
+                        "Cheesecake with strawberry compote" },
+                { "CAKE-GATAUX-001", "Black Forest Gataux", 45.99, "Gataux", 25,
+                        "Traditional Black Forest gataux with cherries" },
+                { "CAKE-GATAUX-002", "Opera Gataux", 48.50, "Gataux", 20,
+                        "French opera gataux with coffee and chocolate" }
         };
 
         fillData(sheet, data);
@@ -74,11 +80,12 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "CAKE-CHOCO-001", "Chocolate Fudge Cake", 28.99, "Chocolate", 20, "Restocking chocolate fudge" },
-                { "CAKE-CHOCO-002", "Chocolate Truffle Delight", 32.50, "Chocolate", 15, "Restocking truffle cake" },
-                { "CAKE-VANILLA-001", "Classic Vanilla Sponge", 18.99, "Vanilla", 30, "Restocking vanilla sponge" },
-                { "CAKE-FRUIT-001", "Strawberry Shortcake", 24.99, "Fruit", 25, "Restocking strawberry cake" },
-                { "CAKE-SPECIAL-001", "Red Velvet Classic", 29.99, "Chocolate", 10, "Restocking red velvet" }
+                { "CAKE-BDAY-001", "Rainbow Birthday Cake", 35.99, "Birthday Cakes", 20, "Restocking birthday cakes" },
+                { "CAKE-BDAY-002", "Unicorn Dream Cake", 42.50, "Birthday Cakes", 15, "Restocking unicorn cakes" },
+                { "CAKE-WEDDING-001", "Classic White Wedding Cake", 150.00, "Wedding Cakes", 5,
+                        "Restocking wedding cakes" },
+                { "CAKE-CHEESE-001", "New York Cheesecake", 28.99, "Cheese Cakes", 25, "Restocking cheesecakes" },
+                { "CAKE-GATAUX-001", "Black Forest Gataux", 45.99, "Gataux", 10, "Restocking gataux" }
         };
 
         fillData(sheet, data);
@@ -95,20 +102,25 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "CAKE-CHOCO-001", "Chocolate Fudge Cake Updated", 30.99, "Chocolate", 10,
+                { "CAKE-BDAY-001", "Rainbow Birthday Cake Updated", 38.99, "Birthday Cakes", 10,
                         "Updated price and restocking" },
-                { "CAKE-NEW-TIRAMISU-001", "Tiramisu Classic", 34.99, "Chocolate", 25,
-                        "Italian coffee-flavored dessert" },
-                { "CAKE-NEW-TIRAMISU-002", "Tiramisu Deluxe", 38.50, "Chocolate", 15,
-                        "Premium tiramisu with mascarpone" },
-                { "CAKE-NEW-CHEESE-001", "New York Cheesecake", 32.99, "Vanilla", 30, "Classic creamy cheesecake" },
-                { "CAKE-NEW-CHEESE-002", "Blueberry Cheesecake", 35.50, "Fruit", 20,
-                        "Cheesecake with blueberry topping" },
-                { "CAKE-VANILLA-001", "Classic Vanilla Sponge", 19.99, "Vanilla", 15, "Price updated and restocking" },
-                { "CAKE-NEW-MATCHA-001", "Matcha Green Tea Cake", 29.99, "Vanilla", 25, "Japanese matcha flavor" },
-                { "CAKE-NEW-LEMON-001", "Lemon Drizzle Cake", 21.50, "Fruit", 35, "Tangy lemon cake with glaze" },
-                { "CAKE-NEW-COCONUT-001", "Coconut Paradise", 26.99, "Vanilla", 20, "Tropical coconut cake" },
-                { "CAKE-SPECIAL-001", "Red Velvet Classic", 31.99, "Chocolate", 5, "Price increase and small restock" }
+                { "CAKE-NEW-PRINCESS-001", "Princess Castle Cake", 55.00, "Birthday Cakes", 25,
+                        "Beautiful princess themed castle cake" },
+                { "CAKE-NEW-SUPERHERO-001", "Superhero Birthday Cake", 48.50, "Birthday Cakes", 15,
+                        "Action-packed superhero themed cake" },
+                { "CAKE-NEW-WEDDING-003", "Floral Wedding Cake", 200.00, "Wedding Cakes", 8,
+                        "Elegant floral decorated wedding cake" },
+                { "CAKE-CHEESE-002", "Blueberry Cheesecake Updated", 35.50, "Cheese Cakes", 20,
+                        "Updated cheesecake with blueberry topping" },
+                { "CAKE-NEW-CHEESE-004", "Mango Cheesecake", 34.99, "Cheese Cakes", 15,
+                        "Tropical mango cheesecake" },
+                { "CAKE-NEW-GATAUX-003", "Strawberry Gataux", 42.99, "Gataux", 25, "Fresh strawberry gataux" },
+                { "CAKE-NEW-GATAUX-004", "Chocolate Mousse Gataux", 46.50, "Gataux", 18,
+                        "Rich chocolate mousse gataux" },
+                { "CAKE-GATAUX-001", "Black Forest Gataux Updated", 48.99, "Gataux", 5,
+                        "Price increase and small restock" },
+                { "CAKE-NEW-BDAY-004", "Dinosaur Birthday Cake", 44.99, "Birthday Cakes", 20,
+                        "Fun dinosaur themed birthday cake" }
         };
 
         fillData(sheet, data);
@@ -146,14 +158,14 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "CAKE-001", "Price is Zero", 0.0, "Chocolate", 10, "price must be > 0" },
-                { "CAKE-002", "Negative Price", -10.50, "Vanilla", 5, "price is negative" },
-                { "CAKE-003", "Price Too High", 2000000.0, "Fruit", 20, "price exceeds 1000000" },
-                { "CAKE-004", "Quantity is Decimal", 25.99, "Chocolate", 10.5, "quantity must be integer" },
-                { "CAKE-005", "Negative Quantity", 18.50, "Vanilla", -5, "quantity is negative" },
-                { "CAKE-006", "Quantity Too High", 22.50, "Fruit", 200000, "quantity exceeds 100000" },
-                { "CAKE-007", "Price is Text", "abc", "Chocolate", 10, "price is not a number" },
-                { "CAKE-008", "Quantity is Text", 25.99, "Vanilla", "ten", "quantity is not a number" }
+                { "CAKE-001", "Price is Zero", 0.0, "Birthday Cakes", 10, "price must be > 0" },
+                { "CAKE-002", "Negative Price", -10.50, "Wedding Cakes", 5, "price is negative" },
+                { "CAKE-003", "Price Too High", 2000000.0, "Cheese Cakes", 20, "price exceeds 1000000" },
+                { "CAKE-004", "Quantity is Decimal", 25.99, "Gataux", 10.5, "quantity must be integer" },
+                { "CAKE-005", "Negative Quantity", 18.50, "Birthday Cakes", -5, "quantity is negative" },
+                { "CAKE-006", "Quantity Too High", 22.50, "Wedding Cakes", 200000, "quantity exceeds 100000" },
+                { "CAKE-007", "Price is Text", "abc", "Cheese Cakes", 10, "price is not a number" },
+                { "CAKE-008", "Quantity is Text", 25.99, "Gataux", "ten", "quantity is not a number" }
         };
 
         fillData(sheet, data);
@@ -170,9 +182,10 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "CAKE-001", "First Chocolate Cake", 25.99, "Chocolate", 10, "This is fine" },
-                { "CAKE-002", "Vanilla Cake", 18.50, "Vanilla", 5, "This is fine" },
-                { "CAKE-001", "Duplicate Chocolate Cake", 29.99, "Chocolate", 15, "Duplicate productCode CAKE-001" },
+                { "CAKE-001", "First Birthday Cake", 35.99, "Birthday Cakes", 10, "This is fine" },
+                { "CAKE-002", "Wedding Cake", 150.00, "Wedding Cakes", 5, "This is fine" },
+                { "CAKE-001", "Duplicate Birthday Cake", 38.99, "Birthday Cakes", 15,
+                        "Duplicate productCode CAKE-001" },
                 { "CAKE-003", "Unknown Category Cake", 22.50, "UnknownCategory", 20, "Category does not exist" },
                 { "CAKE-004", "Another Unknown", 19.99, "Dessert", 25, "Category Dessert does not exist" },
                 { "CAKE-005", "Ice Cream Cake", 24.50, "IceCream", 30, "Category IceCream does not exist" }
@@ -193,11 +206,11 @@ public class GenerateExcelFiles {
 
         Object[][] data = {
                 { "CAKE-VERY-LONG-PRODUCT-CODE-THAT-EXCEEDS-ONE-HUNDRED-CHARACTERS-LIMIT-AND-WILL-CAUSE-VALIDATION-ERROR-FOR-SURE",
-                        "Short Name", 25.99, "Chocolate", 10, "productCode exceeds 100 characters" },
+                        "Short Name", 25.99, "Birthday Cakes", 10, "productCode exceeds 100 characters" },
                 { "CAKE-001",
                         "This is a very long cake name that definitely exceeds one hundred characters limit and will cause validation error",
-                        18.50, "Vanilla", 5, "name exceeds 100 characters" },
-                { "CAKE-002", "Normal Name", 22.50, "Chocolate", 20, "This one is fine" }
+                        18.50, "Wedding Cakes", 5, "name exceeds 100 characters" },
+                { "CAKE-002", "Normal Name", 22.50, "Cheese Cakes", 20, "This one is fine" }
         };
 
         fillData(sheet, data);
@@ -214,17 +227,17 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "", "Empty ProductCode", 25.99, "Chocolate", 10, "ERROR: productCode is empty" },
-                { "CAKE-001", "", 18.50, "Vanilla", 5, "ERROR: name is empty" },
-                { "CAKE-002", "Negative Price", -10.0, "Fruit", 20, "ERROR: price is negative" },
+                { "", "Empty ProductCode", 25.99, "Birthday Cakes", 10, "ERROR: productCode is empty" },
+                { "CAKE-001", "", 18.50, "Wedding Cakes", 5, "ERROR: name is empty" },
+                { "CAKE-002", "Negative Price", -10.0, "Cheese Cakes", 20, "ERROR: price is negative" },
                 { "CAKE-003", "No Category", 29.99, "", 15, "ERROR: categoryName is empty" },
-                { "CAKE-004", "Bad Quantity", 22.50, "Chocolate", "abc", "ERROR: quantity is not a number" },
-                { "CAKE-001", "Duplicate Code", 19.99, "Chocolate", 10, "ERROR: duplicate productCode" },
+                { "CAKE-004", "Bad Quantity", 22.50, "Gataux", "abc", "ERROR: quantity is not a number" },
+                { "CAKE-001", "Duplicate Code", 19.99, "Birthday Cakes", 10, "ERROR: duplicate productCode" },
                 { "CAKE-005", "Unknown Category", 24.99, "UnknownCat", 25, "ERROR: category does not exist" },
                 { "CAKE-VERY-LONG-CODE-EXCEEDS-LIMIT-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-                        "Too Long", 30.0, "Chocolate", 5, "ERROR: productCode too long" },
-                { "CAKE-006", "Price Zero", 0.0, "Vanilla", 10, "ERROR: price must be > 0" },
-                { "CAKE-007", "Negative Qty", 25.99, "Fruit", -5, "ERROR: quantity is negative" }
+                        "Too Long", 30.0, "Wedding Cakes", 5, "ERROR: productCode too long" },
+                { "CAKE-006", "Price Zero", 0.0, "Cheese Cakes", 10, "ERROR: price must be > 0" },
+                { "CAKE-007", "Negative Qty", 25.99, "Gataux", -5, "ERROR: quantity is negative" }
         };
 
         fillData(sheet, data);
@@ -241,16 +254,17 @@ public class GenerateExcelFiles {
         createHeaderRow(headerRow);
 
         Object[][] data = {
-                { "CAKE-GOOD-001", "Perfect Chocolate Cake", 25.99, "Chocolate", 50, "This row is completely valid" },
-                { "CAKE-BAD-001", "Missing Price", null, "Vanilla", 30, "ERROR: price is empty" },
-                { "CAKE-GOOD-002", "Strawberry Delight", 22.50, "Fruit", 40, "This row is valid" },
+                { "CAKE-GOOD-001", "Perfect Birthday Cake", 35.99, "Birthday Cakes", 50,
+                        "This row is completely valid" },
+                { "CAKE-BAD-001", "Missing Price", null, "Wedding Cakes", 30, "ERROR: price is empty" },
+                { "CAKE-GOOD-002", "Cheesecake Delight", 28.50, "Cheese Cakes", 40, "This row is valid" },
                 { "CAKE-BAD-002", "Unknown Category", 18.99, "Bakery", 25, "ERROR: category Bakery does not exist" },
-                { "CAKE-GOOD-003", "Vanilla Supreme", 19.99, "Vanilla", 35, "This row is valid" },
-                { "CAKE-BAD-003", "Negative Quantity", 24.50, "Chocolate", -10, "ERROR: quantity is negative" },
-                { "CAKE-GOOD-004", "Blueberry Cake", 21.99, "Fruit", 45, "This row is valid" },
-                { "CAKE-BAD-004", "", 29.99, "Chocolate", 20, "ERROR: name is empty" },
-                { "CAKE-GOOD-005", "Lemon Tart", 17.50, "Fruit", 30, "This row is valid" },
-                { "CAKE-BAD-005", "Price Text", "abc", "Vanilla", 15, "ERROR: price is not a number" }
+                { "CAKE-GOOD-003", "Gataux Supreme", 45.99, "Gataux", 35, "This row is valid" },
+                { "CAKE-BAD-003", "Negative Quantity", 24.50, "Birthday Cakes", -10, "ERROR: quantity is negative" },
+                { "CAKE-GOOD-004", "Wedding Cake Special", 175.00, "Wedding Cakes", 8, "This row is valid" },
+                { "CAKE-BAD-004", "", 29.99, "Cheese Cakes", 20, "ERROR: name is empty" },
+                { "CAKE-GOOD-005", "Opera Gataux", 48.50, "Gataux", 30, "This row is valid" },
+                { "CAKE-BAD-005", "Price Text", "abc", "Birthday Cakes", 15, "ERROR: price is not a number" }
         };
 
         fillData(sheet, data);

@@ -974,3 +974,261 @@ footer {
     transform: rotate(360deg);
   }
 }
+
+/* ========================================
+   CATEGORY TABS - NEW DESIGN
+   ======================================== */
+.category-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 40px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff 0%, #ffeaa7 100%);
+  border-radius: 20px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) transparent;
+}
+
+.category-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+
+.category-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.category-tabs::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+.category-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-color);
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.category-tab:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 118, 117, 0.3);
+  border-color: var(--primary-color);
+}
+
+.category-tab.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: white;
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 118, 117, 0.4);
+}
+
+.category-tab .tab-text {
+  font-family: "Nunito", sans-serif;
+}
+
+/* ========================================
+   CATEGORY SECTIONS
+   ======================================== */
+.category-section {
+  margin-bottom: 60px;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.category-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, rgba(255, 154, 158, 0.1) 0%, rgba(255, 234, 167, 0.1) 100%);
+  border-radius: 20px;
+  border-left: 5px solid var(--primary-color);
+}
+
+.category-title {
+  font-family: "Fredoka One", cursive;
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin: 0 0 10px 0;
+  text-align: center;
+  text-shadow: 2px 2px 0px rgba(255, 234, 167, 0.5);
+}
+
+.category-description {
+  font-size: 1.1rem;
+  color: var(--light-text);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ========================================
+   ENHANCED CAKE CARDS
+   ======================================== */
+.cake-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+  color: var(--text-color);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+.cake-badge.out-of-stock {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.cake-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.stock-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #e8f5e9;
+  color: #28a745;
+}
+
+.stock-badge.out-of-stock {
+  background: #ffebee;
+  color: #dc3545;
+}
+
+.stock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.cake-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.cake-actions .btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cake-actions .btn span {
+  font-size: 1.2rem;
+}
+
+.cake-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+@media (max-width: 768px) {
+  .category-tabs {
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .category-tab {
+    padding: 10px 18px;
+    font-size: 0.9rem;
+  }
+
+  .category-tab .tab-icon {
+    font-size: 1.3rem;
+  }
+
+  .category-title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .category-icon {
+    font-size: 2.5rem;
+  }
+
+  .category-description {
+    font-size: 1rem;
+  }
+
+  .cake-actions {
+    flex-direction: column;
+  }
+
+  .cake-actions .btn {
+    width: 100%;
+  }
+}

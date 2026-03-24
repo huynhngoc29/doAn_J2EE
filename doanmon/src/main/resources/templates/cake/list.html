@@ -52,45 +52,121 @@
     </section>
 
     <main class="main-content container" style="flex-direction: column; align-items: stretch;">
-        <h2 class="section-title">Our Famous Cakes</h2>
 
-        <div class="cake-grid">
-            <div th:each="cake : ${cakes}" class="cake-card">
-                <div class="cake-image">
-                    <!-- Check if image exists, otherwise show placeholder -->
-                    <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/400x300/ff9a9e/white?text=Sweet+Delights'}"
-                        th:alt="${cake.name}">
-                </div>
-                <div class="cake-info">
-                    <span class="cake-category"
-                        th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
-                    <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <p class="cake-price" style="margin-bottom: 0;"
-                            th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
-                        <span th:if="${cake.quantity > 0}"
-                            style="font-size: 0.9em; color: #28a745; font-weight: bold;">In Stock:
-                            [[${cake.quantity}]]</span>
-                        <span th:if="${cake.quantity <= 0}"
-                            style="font-size: 0.9em; color: #dc3545; font-weight: bold;">Out of Stock</span>
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" onclick="showAllCategories()">
+                <span class="tab-text">All Cakes</span>
+            </button>
+            <button th:each="category : ${categories}" class="category-tab"
+                th:onclick="'showCategory(\'' + ${category.id} + '\')'">
+                <span class="tab-text" th:text="${category.name}">Category</span>
+            </button>
+        </div>
+
+        <!-- Cakes by Category -->
+        <div th:each="entry : ${cakesByCategory}" class="category-section" th:data-category-id="${entry.key.id}">
+            <div class="category-header">
+                <h2 class="category-title" th:text="${entry.key.name}">
+                </h2>
+                <p class="category-description" th:text="${entry.key.description}">Category description</p>
+            </div>
+
+            <div class="cake-grid">
+                <div th:each="cake : ${entry.value}" class="cake-card">
+                    <div class="cake-image">
+                        <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/400x300/ff9a9e/white?text=Sweet+Delights'}"
+                            th:alt="${cake.name}">
+                        <div class="cake-badge" th:if="${cake.quantity > 0 && cake.quantity < 10}">
+                            <span>Only [[${cake.quantity}]] left!</span>
+                        </div>
+                        <div class="cake-badge out-of-stock" th:if="${cake.quantity <= 0}">
+                            <span>Out of Stock</span>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
-                        <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary"
-                            style="flex: 1; text-align: center; padding: 10px;">Details</a>
-
-                        <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
-                            <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}"
-                                class="btn btn-primary ajax-add-to-cart"
-                                style="flex: 1; text-align: center; padding: 10px;">Add to Cart</a>
-                            <button th:if="${cake.quantity <= 0}" class="btn btn-primary"
-                                style="flex: 1; opacity: 0.5; cursor: not-allowed; padding: 10px;" disabled>Out of
-                                Stock</button>
-                        </th:block>
+                    <div class="cake-info">
+                        <span class="cake-category"
+                            th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
+                        <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
+                        <div class="cake-price-row">
+                            <p class="cake-price"
+                                th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                            <span class="stock-badge in-stock" th:if="${cake.quantity > 0}">
+                                <span class="stock-dot"></span> In Stock
+                            </span>
+                            <span class="stock-badge out-of-stock" th:if="${cake.quantity <= 0}">
+                                <span class="stock-dot"></span> Out of Stock
+                            </span>
+                        </div>
+                        <div class="cake-actions">
+                            <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary">
+                                Details
+                            </a>
+                            <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                                <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}"
+                                    class="btn btn-primary ajax-add-to-cart">
+                                    Add to Cart
+                                </a>
+                                <button th:if="${cake.quantity <= 0}" class="btn btn-primary" disabled>
+                                    Unavailable
+                                </button>
+                            </th:block>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Uncategorized Cakes -->
+        <div th:if="${!uncategorizedCakes.isEmpty()}" class="category-section" data-category-id="uncategorized">
+            <div class="category-header">
+                <h2 class="category-title">Other Delights</h2>
+                <p class="category-description">More delicious cakes for you to explore</p>
+            </div>
+
+            <div class="cake-grid">
+                <div th:each="cake : ${uncategorizedCakes}" class="cake-card">
+                    <div class="cake-image">
+                        <img th:src="${cake.image != null ? cake.image : 'https://placehold.co/400x300/ff9a9e/white?text=Sweet+Delights'}"
+                            th:alt="${cake.name}">
+                        <div class="cake-badge" th:if="${cake.quantity > 0 && cake.quantity < 10}">
+                            <span>Only [[${cake.quantity}]] left!</span>
+                        </div>
+                        <div class="cake-badge out-of-stock" th:if="${cake.quantity <= 0}">
+                            <span>Out of Stock</span>
+                        </div>
+                    </div>
+                    <div class="cake-info">
+                        <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
+                        <div class="cake-price-row">
+                            <p class="cake-price"
+                                th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                            <span class="stock-badge in-stock" th:if="${cake.quantity > 0}">
+                                <span class="stock-dot"></span> In Stock
+                            </span>
+                            <span class="stock-badge out-of-stock" th:if="${cake.quantity <= 0}">
+                                <span class="stock-dot"></span> Out of Stock
+                            </span>
+                        </div>
+                        <div class="cake-actions">
+                            <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary">
+                                Details
+                            </a>
+                            <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                                <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}"
+                                    class="btn btn-primary ajax-add-to-cart">
+                                    Add to Cart
+                                </a>
+                                <button th:if="${cake.quantity <= 0}" class="btn btn-primary" disabled>
+                                    Unavailable
+                                </button>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <footer class="footer">
@@ -100,6 +176,33 @@
     </footer>
 
     <script>
+        // Category Tab Functionality
+        function showAllCategories() {
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+            });
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector('.category-tab').classList.add('active');
+        }
+
+        function showCategory(categoryId) {
+            document.querySelectorAll('.category-section').forEach(section => {
+                if (section.getAttribute('data-category-id') == categoryId) {
+                    section.style.display = 'block';
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.category-tab').classList.add('active');
+        }
+
+        // Add to Cart AJAX
         document.querySelectorAll('.ajax-add-to-cart').forEach(button => {
             button.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -116,10 +219,10 @@
                         cartSpans.forEach(span => span.textContent = data.cartSize);
 
                         // Show fancy toast notification
-                        showToast('Đã thêm sản phẩm vào giỏ hàng thành công! 🍰');
+                        showToast('✅ Added to cart successfully! 🍰');
                     })
                     .catch(error => {
-                        showToast('Có lỗi xảy ra, vui lòng thử lại sau.', true);
+                        showToast('❌ Something went wrong, please try again.', true);
                     });
             });
         });
@@ -133,28 +236,48 @@
             toast.style.backgroundColor = isError ? '#e74c3c' : '#4CAF50';
             toast.style.color = 'white';
             toast.style.padding = '15px 25px';
-            toast.style.borderRadius = '5px';
-            toast.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
-            toast.style.zIndex = '1000';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 5px 20px rgba(0,0,0,0.3)';
+            toast.style.zIndex = '10000';
             toast.style.fontSize = '16px';
-            toast.style.transition = 'all 0.3s ease';
-            toast.style.transform = 'translateY(100px)';
+            toast.style.fontWeight = '500';
+            toast.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+            toast.style.transform = 'translateY(100px) scale(0.8)';
             toast.style.opacity = '0';
 
             document.body.appendChild(toast);
 
             // Trigger animation
             setTimeout(() => {
-                toast.style.transform = 'translateY(0)';
+                toast.style.transform = 'translateY(0) scale(1)';
                 toast.style.opacity = '1';
             }, 10);
 
             setTimeout(() => {
-                toast.style.transform = 'translateY(100px)';
+                toast.style.transform = 'translateY(100px) scale(0.8)';
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
+
+        // Smooth scroll animation for category sections
+        document.addEventListener('DOMContentLoaded', function () {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(30px)';
+                section.style.transition = 'all 0.6s ease-out';
+                observer.observe(section);
+            });
+        });
     </script>
     <script src="/js/mobile-menu.js"></script>
 </body>
