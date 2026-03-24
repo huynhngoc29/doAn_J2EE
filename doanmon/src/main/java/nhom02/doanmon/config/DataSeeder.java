@@ -43,22 +43,22 @@ public class DataSeeder {
                                                 new Cake(null, "Chocolate Fudge Cake", 15.99,
                                                                 "Rich and moist chocolate cake with fudge frosting.",
                                                                 "https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-                                                                chocCategory, null),
+                                                                chocCategory, null, 20),
                                                 new Cake(null, "Strawberry Shortcake", 12.50,
                                                                 "Fresh strawberries and whipped cream on a sponge cake.",
                                                                 "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-                                                                fruitCategory, null),
+                                                                fruitCategory, null, 15),
                                                 new Cake(null, "Red Velvet", 18.00,
                                                                 "Classic red velvet cake with cream cheese frosting.",
                                                                 "https://images.unsplash.com/photo-1586788680434-30d32443d858?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-                                                                classicCategory, null),
+                                                                classicCategory, null, 10),
                                                 new Cake(null, "Lemon Drizzle", 10.99,
                                                                 "Zesty lemon cake with a sugary glaze.",
                                                                 "https://images.unsplash.com/photo-1519340333755-56e9c1d04579?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-                                                                fruitCategory, null),
+                                                                fruitCategory, null, 25),
                                                 new Cake(null, "Cheesecake", 20.00, "Creamy New York style cheesecake.",
                                                                 "https://images.unsplash.com/photo-1533134242443-d4fd215305ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-                                                                cheeseCategory, null));
+                                                                cheeseCategory, null, 30));
                                 cakeRepository.saveAll(cakes);
                         }
 

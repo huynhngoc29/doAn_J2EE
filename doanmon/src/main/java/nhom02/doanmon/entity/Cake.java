@@ -34,10 +34,13 @@ public class Cake {
     @Column(length = 255)
     private String model3D;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int quantity;
+
     public Cake() {
     }
 
-    public Cake(Long id, String name, Double price, String description, String image, Category category, String model3D) {
+    public Cake(Long id, String name, Double price, String description, String image, Category category, String model3D, int quantity) {
         this.id = id;
         this.name = name;
         this.price = price;
@@ -45,6 +48,7 @@ public class Cake {
         this.image = image;
         this.category = category;
         this.model3D = model3D;
+        this.quantity = quantity;
     }
 
     public Long getId() {
@@ -101,5 +105,13 @@ public class Cake {
 
     public void setModel3D(String model3D) {
         this.model3D = model3D;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

@@ -56,12 +56,19 @@
                 <div class="cake-info">
                     <span class="cake-category" th:text="${cake.category != null ? cake.category.name : ''}">Category</span>
                     <h3 class="cake-name" th:text="${cake.name}">Cake Name</h3>
-                    <p class="cake-price" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
-                    <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary">View Details</a>
-
-                    <a th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}"
-                        th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart">Add to
-                        Cart</a>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <p class="cake-price" style="margin-bottom: 0;" th:text="${'$' + #numbers.formatDecimal(cake.price, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+                        <span th:if="${cake.quantity > 0}" style="font-size: 0.9em; color: #28a745; font-weight: bold;">In Stock: [[${cake.quantity}]]</span>
+                        <span th:if="${cake.quantity <= 0}" style="font-size: 0.9em; color: #dc3545; font-weight: bold;">Out of Stock</span>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: center; width: 100%;">
+                        <a th:href="@{/cakes/{id}(id=${cake.id})}" class="btn btn-secondary" style="flex: 1; text-align: center; padding: 10px;">Details</a>
+                        
+                        <th:block th:unless="${#authorization.expression('hasAuthority(''ADMIN'')')}">
+                            <a th:if="${cake.quantity > 0}" th:href="@{/cart/api/add/{id}(id=${cake.id})}" class="btn btn-primary ajax-add-to-cart" style="flex: 1; text-align: center; padding: 10px;">Add to Cart</a>
+                            <button th:if="${cake.quantity <= 0}" class="btn btn-primary" style="flex: 1; opacity: 0.5; cursor: not-allowed; padding: 10px;" disabled>Out of Stock</button>
+                        </th:block>
+                    </div>
                 </div>
             </div>
         </div>
