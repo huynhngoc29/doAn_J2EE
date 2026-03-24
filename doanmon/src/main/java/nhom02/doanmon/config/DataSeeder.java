@@ -20,24 +20,29 @@ public class DataSeeder {
 
         @Bean
         CommandLineRunner initDatabase(CakeRepository cakeRepository, RoleRepository roleRepository,
-                        UserRepository userRepository, nhom02.doanmon.repository.CategoryRepository categoryRepository) {
+                        UserRepository userRepository,
+                        nhom02.doanmon.repository.CategoryRepository categoryRepository) {
                 return args -> {
                         // Seed Categories
                         if (categoryRepository.count() == 0) {
-                            categoryRepository.saveAll(List.of(
-                                new nhom02.doanmon.entity.Category(null, "Chocolate", "Chocolate cakes"),
-                                new nhom02.doanmon.entity.Category(null, "Fruit", "Fruit cakes"),
-                                new nhom02.doanmon.entity.Category(null, "Classic", "Classic cakes"),
-                                new nhom02.doanmon.entity.Category(null, "Cheese", "Cheese cakes")
-                            ));
+                                categoryRepository.saveAll(List.of(
+                                                new nhom02.doanmon.entity.Category(null, "Chocolate",
+                                                                "Chocolate cakes"),
+                                                new nhom02.doanmon.entity.Category(null, "Fruit", "Fruit cakes"),
+                                                new nhom02.doanmon.entity.Category(null, "Classic", "Classic cakes"),
+                                                new nhom02.doanmon.entity.Category(null, "Cheese", "Cheese cakes")));
                         }
 
                         // Seed Cakes
                         if (cakeRepository.count() == 0) {
-                                nhom02.doanmon.entity.Category chocCategory = categoryRepository.findAll().stream().filter(c -> c.getName().equals("Chocolate")).findFirst().orElse(null);
-                                nhom02.doanmon.entity.Category fruitCategory = categoryRepository.findAll().stream().filter(c -> c.getName().equals("Fruit")).findFirst().orElse(null);
-                                nhom02.doanmon.entity.Category classicCategory = categoryRepository.findAll().stream().filter(c -> c.getName().equals("Classic")).findFirst().orElse(null);
-                                nhom02.doanmon.entity.Category cheeseCategory = categoryRepository.findAll().stream().filter(c -> c.getName().equals("Cheese")).findFirst().orElse(null);
+                                nhom02.doanmon.entity.Category chocCategory = categoryRepository.findAll().stream()
+                                                .filter(c -> c.getName().equals("Chocolate")).findFirst().orElse(null);
+                                nhom02.doanmon.entity.Category fruitCategory = categoryRepository.findAll().stream()
+                                                .filter(c -> c.getName().equals("Fruit")).findFirst().orElse(null);
+                                nhom02.doanmon.entity.Category classicCategory = categoryRepository.findAll().stream()
+                                                .filter(c -> c.getName().equals("Classic")).findFirst().orElse(null);
+                                nhom02.doanmon.entity.Category cheeseCategory = categoryRepository.findAll().stream()
+                                                .filter(c -> c.getName().equals("Cheese")).findFirst().orElse(null);
 
                                 List<Cake> cakes = List.of(
                                                 new Cake(null, "Chocolate Fudge Cake", 15.99,

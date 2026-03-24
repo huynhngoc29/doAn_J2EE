@@ -32,6 +32,8 @@
 
       <div class="admin-toolbar">
         <a href="/admin/cakes/add" class="btn btn-primary">Add New Cake</a>
+        <label for="excelFileInput" class="btn btn-success" style="cursor: pointer;">Import Excel</label>
+        <input type="file" id="excelFileInput" accept=".xlsx,.xls" style="display: none;" />
       </div>
 
       <div class="admin-table-wrapper">
@@ -79,5 +81,133 @@
         </table>
       </div>
     </main>
+
+    <!-- Import Excel Modal -->
+    <div class="modal-backdrop" id="importModal">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Kết quả kiểm tra file Excel</h3>
+          <button class="modal-close" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-summary">
+            <div class="summary-card total">
+              <span id="modalTotal">0</span>
+              Tổng số dòng
+            </div>
+            <div class="summary-card valid">
+              <span id="modalValid">0</span>
+              Hợp lệ
+            </div>
+            <div class="summary-card error">
+              <span id="modalError">0</span>
+              Lỗi
+            </div>
+          </div>
+          <div class="error-list" id="modalErrorList" style="display: none;">
+            <h4>Chi tiết lỗi:</h4>
+            <div id="errorItemsContainer"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeImportModal()">Hủy</button>
+          <button class="btn btn-primary" id="btnConfirmImport" onclick="commitImport()" style="display: none;">Thêm sản phẩm hợp lệ</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let validRowsData = [];
+
+      function closeImportModal() {
+          document.getElementById('importModal').classList.remove('show');
+      }
+
+      function commitImport() {
+          const btn = document.getElementById('btnConfirmImport');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="loading-spinner"></span> Đang xử lý...';
+          btn.disabled = true;
+
+          fetch('/api/import/products/commit', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(validRowsData)
+          })
+          .then(res => res.json())
+          .then(commitData => {
+              alert(`Đã thêm thành công ${commitData.successCount} sản phẩm!\nThất bại: ${commitData.failedCount}`);
+              window.location.reload();
+          })
+          .catch(err => {
+              alert('Đã xảy ra lỗi khi lưu sản phẩm vào database.');
+              console.error(err);
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+          });
+      }
+
+      document.getElementById('excelFileInput').addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          fetch('/api/import/products/preview', {
+              method: 'POST',
+              body: formData
+          })
+          .then(response => {
+              if (!response.ok) {
+                  throw new Error('Network response was not ok');
+              }
+              return response.json();
+          })
+          .then(data => {
+              const summary = data.summary;
+              validRowsData = data.validRows || [];
+              
+              document.getElementById('modalTotal').textContent = summary.totalRows;
+              document.getElementById('modalValid').textContent = summary.validCount;
+              document.getElementById('modalError').textContent = summary.errorCount;
+              
+              const errorList = document.getElementById('modalErrorList');
+              const errorContainer = document.getElementById('errorItemsContainer');
+              
+              if (summary.errorCount > 0 && data.errorRows) {
+                  errorList.style.display = 'block';
+                  errorContainer.innerHTML = '';
+                  data.errorRows.forEach(err => {
+                      const div = document.createElement('div');
+                      div.className = 'error-item';
+                      // Sử dụng thuộc tính rowIndex thay vì rowNumber
+                      div.innerHTML = `<span class="row-badge">Dòng ${err.rowIndex}</span> <span>[Mã: ${err.productCode || 'N/A'}] ${err.errorMessage}</span>`;
+                      errorContainer.appendChild(div);
+                  });
+              } else {
+                  errorList.style.display = 'none';
+              }
+              
+              const btnConfirm = document.getElementById('btnConfirmImport');
+              if (validRowsData.length > 0) {
+                  btnConfirm.style.display = 'inline-block';
+              } else {
+                  btnConfirm.style.display = 'none';
+              }
+              
+              document.getElementById('importModal').classList.add('show');
+          })
+          .catch(error => {
+              alert('Có lỗi xảy ra khi tải lên hoặc đọc file Excel. Vui lòng kiểm tra lại file.');
+              console.error(error);
+          })
+          .finally(() => {
+              e.target.value = '';
+          });
+      });
+    </script>
   </body>
 </html>
