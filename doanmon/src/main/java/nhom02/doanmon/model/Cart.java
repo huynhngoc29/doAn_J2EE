@@ -13,22 +13,26 @@ public class Cart {
     private List<CartItem> items = new ArrayList<>();
 
     public void addItem(CartItem newItem) {
-        for (CartItem item : items) {
-            if (item.getCake().getId().equals(newItem.getCake().getId())) {
-                item.setQuantity(item.getQuantity() + newItem.getQuantity());
-                return;
+        // If it's a completely new custom design, it will have a different ID and shouldn't merge quantity
+        // However, if we add another item with NO custom image and same cake ID, we can merge.
+        if (newItem.getCustomImage() == null) {
+            for (CartItem item : items) {
+                if (item.getCake().getId().equals(newItem.getCake().getId()) && item.getCustomImage() == null) {
+                    item.setQuantity(item.getQuantity() + newItem.getQuantity());
+                    return;
+                }
             }
         }
         items.add(newItem);
     }
 
-    public void removeItem(Long cakeId) {
-        items.removeIf(item -> item.getCake().getId().equals(cakeId));
+    public void removeItem(String itemId) {
+        items.removeIf(item -> item.getId().equals(itemId));
     }
 
-    public void updateQuantity(Long cakeId, int quantity) {
+    public void updateQuantity(String itemId, int quantity) {
         for (CartItem item : items) {
-            if (item.getCake().getId().equals(cakeId)) {
+            if (item.getId().equals(itemId)) {
                 if (quantity <= 0) {
                     items.remove(item);
                 } else {

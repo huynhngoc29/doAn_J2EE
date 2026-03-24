@@ -27,6 +27,9 @@ public class PaymentItem {
 
     private double price; // snapshot of unit price
 
+    @jakarta.persistence.Column(columnDefinition = "LONGTEXT")
+    private String customImage;
+
     public double getTotal() {
         return price * quantity;
     }
@@ -70,5 +73,13 @@ public class PaymentItem {
 
     public void setPrice(double price) {
         this.price = price;
+    }
+
+    public String getCustomImage() {
+        return customImage;
+    }
+
+    public void setCustomImage(String customImage) {
+        this.customImage = customImage;
     }
 }
